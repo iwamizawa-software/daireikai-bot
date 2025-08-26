@@ -104,7 +104,7 @@
   
   var seminar = userData => {
     var text = seminarContents[Math.floor(Math.random() * seminarContents.length)];
-    var tax = userData.tamashii >> 1;
+    var tax = Math.floor(userData.tamashii / 2);
     userData.tamashii -= tax;
     Bot.comment(`${userData.shortName}は魂の半分を支払い、みんと主催${text}セミナーを受講した　利益は4位以下に分配された(${-tax}) (残り${userData.count})`);
     var end = userRank.findIndex(userData => userData.tamashii <= 0);
@@ -127,7 +127,7 @@
     if (await listenTo(fumie, userData.id, 30000)) {
       Bot.comment(`${userData.shortName}は保身に走った(+0) (残り${userData.count})`);
     } else {
-      var add = -userData.tamashii >> 1;
+      var add = -Math.floor(userData.tamashii / 2);
       Bot.comment(`${userData.shortName}は名誉を保った(${add}) (残り${userData.count})`);
       userData.tamashii += add;
       onTamashiiChange();

@@ -32,7 +32,7 @@
   };
   
   var kuji = userData => {
-    var r = Bot.kuji(...daireikaiKujiArguments);
+    var r = Bot.kuji(...daireikaiKujiArguments.slice());
     var point = r.shift();
     Bot.comment(`${userData.shortName}[${r[Math.floor(Math.random() * r.length)]}](${(point >= 0 ? '+' : '') + point}) (残り${userData.count})`);
     userData.tamashii += point;

@@ -22,7 +22,7 @@ var daireikaiKujiArguments = [
   [
     -1,
     '末吉',
-    'すえきち,
+    'すえきち',
   ], 20,
   [
     -5,

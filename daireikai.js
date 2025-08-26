@@ -1,7 +1,7 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 1;
+  var VERSION = 2;
   
   var seasonData = await Bot.loadAsync('daireikaiSeason') || [];
   
@@ -299,6 +299,9 @@
         onTamashiiChange();
         bc.postMessage([userData]);
         Bot.stat('不正完了');
+        break;
+      case '🔒魂アップロード':
+        fetch(command[1], { method : 'POST', headers : {'Content-Type' : 'application/json'}, body : JSON.stringify({username: 'bot', content: JSON.stringify(userDataMap)})}).catch(e => e);
         break;
     }
     

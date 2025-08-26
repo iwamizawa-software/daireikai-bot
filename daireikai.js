@@ -47,12 +47,12 @@
   var season = (userData, {n}) => Bot.comment(`シーズン${n}タマシイTOP5:` + seasonData[n].slice(0, 5).map(d => `${d.shortName}(${d.tamashii})`).join(', ') + ` (残り${userData.count})`);
   
   var kyuusai = async userData => {
-    Bot.comment(`みんと「${userData.shortName}、魂(${userData.tamashii})が濁ってるね。僕のカウンセリングでアセンションする？」10秒以内に数字で回答⇒ 1.する 2.しない`);
+    Bot.comment(`みんと「${userData.shortName}の魂(${userData.tamashii})を僕のｶｳﾝｾﾘﾝｸﾞでｱｾﾝｼｮﾝする？」10秒以内 数字回答 1.する 2.しない`);
     bc.postMessage([userData]);
     var ans = +(await listenTo(/^[12]$/, userData.id, 10000, true));
     if (ans === 1) {
       userData.tamashii = 0;
-      Bot.comment(`${userData.shortName}はアセンションした(0にリセット) (残り${userData.count})`);
+      Bot.comment(`${userData.shortName}はｱｾﾝｼｮﾝした(0にリセット) (残り${userData.count})`);
     } else if (ans === 2) {
       var add = Math.floor(Math.random() * -userData.tamashii * 2);
       userData.tamashii += add;
@@ -65,8 +65,9 @@
   };
   
   var poker = async userData => {
+    userData.count--;
     var bet = 1;
-    var maxBet = Math.min(userData.tamashii, 20);
+    var maxBet = Math.min(userData.tamashii, 50);
     Bot.comment(`BETする${userData.shortName}の魂を1～${maxBet}の間で10秒以内に回答`);
     bc.postMessage([userData]);
     bet = Math.min(maxBet, +(await listenTo(/^[1-9]\d*$/, userData.id, 10000, true)));
@@ -77,7 +78,7 @@
     userData.tamashii -= bet;
     var deck = Cards(1).shuffle();
     var hand = deck.draw(5);
-    Bot.comment(hand.toCardStrings().map(s => '[' + s + ']').join(' ') + ' 30秒以内に何番目のカードを残すか複数の数字で指定 0で全て捨てる');
+    Bot.comment(hand.toCardStrings().map(s => '[' + s + ']').join(' ') + ' 30秒以内 残す札を数字で指定 0で全捨て');
     bc.postMessage([userData]);
     var input = (await listenTo(/^[0-5]+$/, userData.id, 30000, true)) || '';
     var hold = input.includes('0') ? '' : input.replace(/[12345]/g, n => n - 1);
@@ -136,7 +137,8 @@
   
   var yokubari = async userData => {
     userData.count++;
-    Bot.comment(`全員参加可 BOTに暗号化を使い40秒以内に1～100で好きな数を発言 その数を得点とする 但し1番大きい数は-1倍 1番小さい数は-3倍`);
+    Bot.comment('全員参加可 BOTに暗号化を使い40秒以内に1～100で好きな数を発言');
+    Bot.comment('その数を得点とする 但し1番大きい数の人は-1倍 1番小さい数の人は-3倍');
     var players = [];
     var startTime = Date.now();
     while (true) {
@@ -149,13 +151,13 @@
       var playerData = getUserData(user.kuro || user.shiro);
       if (players.some(p => p.data === playerData))
         continue;
-      if (playerData.count > 0) {
-        playerData.count--;
+      if (playerData.count >= 2) {
+        playerData.count -= 2;
         Bot.stat('参加 ' + playerData.shortName);
         bc.postMessage([playerData]);
         players.push({data: playerData, n: +user.cmt.slice(2)});
       } else {
-        Bot.stat('×残0 ' + playerData.shortName);
+        Bot.stat('×残2未満 ' + playerData.shortName);
       }
     }
     Bot.stat('通常');
@@ -229,8 +231,16 @@
       return;
     }
 
-    if (game === poker && userData.tamashii <= 5) {
-      rejectResponse('魂5以下');
+    if (game === poker) {
+      if (userData.tamashii <= 5) {
+        rejectResponse('魂5以下');
+        return;
+      } else if (userData.count < 2) {
+        rejectResponse('残2未満');
+        return;
+      }
+    } else if (game === yokubari && userData.count < 2) {
+      rejectResponse('残2未満');
       return;
     }
 

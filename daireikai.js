@@ -1,19 +1,15 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 2;
+  var VERSION = 3;
   
   var seasonData = await Bot.loadAsync('daireikaiSeason') || [];
   
   var userDataMap = await Bot.loadAsync('daireikai') || {};
-  Object.values(userDataMap).forEach(d => {
-    if (typeof d.tamashii !== 'number' || isNaN(d.tamashii))
-      d.tamashii = 0;
-  });
   var getUserData = id => userDataMap[id] || (userDataMap[id] = {id, tamashii: 0});
   
   var userRank;
-  var sortRank = () => userRank = Object.values(userDataMap).filter(d => d.tamashii !== undefined).sort((a, b) => b.tamashii - a.tamashii);
+  var sortRank = () => userRank = Object.values(userDataMap).sort((a, b) => b.tamashii - a.tamashii);
   sortRank();
   
   var bc = window.daireikaiChannel || new BroadcastChannel('daireikai');
@@ -278,6 +274,10 @@
         Bot();
         break;
       case 'BOTリロード':
+        location.reload();
+        break;
+      case 'BOT移動':
+        location.href = '#/room/' + command[1];
         location.reload();
         break;
       case 'BOT通常':

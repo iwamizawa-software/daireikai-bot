@@ -6,6 +6,10 @@
   var seasonData = await Bot.loadAsync('daireikaiSeason') || [];
   
   var userDataMap = await Bot.loadAsync('daireikai') || {};
+  Object.values(userDataMap).forEach(d => {
+    if (typeof d.tamashii !== 'number' || isNaN(d.tamashii))
+      d.tamashii = 0;
+  });
   var getUserData = id => userDataMap[id] || (userDataMap[id] = {id, tamashii: 0});
   
   var userRank;

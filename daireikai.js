@@ -1,7 +1,7 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 3;
+  var VERSION = 4;
   
   var seasonData = await Bot.loadAsync('daireikaiSeason') || [];
   
@@ -188,7 +188,7 @@
 
   on('COM', async user => {
   
-    var rejectResponse = reason => Bot.stat('×' + user.id.slice(0, 3) + ' ' + reason);
+    var rejectResponse = reason => Bot.stat('×id:' + user.id.slice(0, 3) + ' ' + reason);
   
     if (denyList.has(user.shiro) || denyList.has(user.kuro)) {
       rejectResponse('魂BOT出禁');
@@ -301,7 +301,9 @@
         Bot.stat('不正完了');
         break;
       case '🔒魂アップロード':
-        fetch(command[1], { method : 'POST', headers : {'Content-Type' : 'application/json'}, body : JSON.stringify({username: 'bot', content: JSON.stringify(userDataMap)})}).catch(e => e);
+        var formData = new FormData();
+        formData.append('file', new Blob([JSON.stringify(userDataMap)], { type: 'application/json' }), 'tamashii.json');
+        fetch(command[1], {method: 'POST', body: formData});
         break;
     }
     

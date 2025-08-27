@@ -277,11 +277,14 @@
         location.reload();
         break;
       case 'BOT移動':
-        location.href = '#/room/' + command[1];
+        location.href = '#/room/' + (command[1] || 1);
         location.reload();
         break;
       case 'BOT通常':
         Bot.stat('通常');
+        break;
+      case 'BOT時間':
+        Bot.stat(Date.now());
         break;
       case '魂バージョン':
         Bot.stat(VERSION);

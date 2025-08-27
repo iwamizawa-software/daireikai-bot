@@ -17,10 +17,10 @@
   bc.onmessage = event => {
     var rankChanged;
     event.data?.forEach?.(userData => {
-      var oldData = userDataMap[userData.id];
-      userDataMap[userData.id] = userData;
+      var oldData = getUserData(userData.id);
       if (oldData?.tamashii !== userData.tamashii)
         rankChanged = true;
+      Object.assign(oldData, userData);
     });
     if (rankChanged)
       sortRank();

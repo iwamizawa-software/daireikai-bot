@@ -34,17 +34,17 @@
   var kuji = userData => {
     var r = Bot.kuji(...daireikaiKujiArguments).slice();
     var point = r.shift();
-    Bot.comment(`${userData.shortName}[${r[Math.floor(Math.random() * r.length)]}](${(point >= 0 ? '+' : '') + point}) (残り${userData.count})`);
+    Bot.comment(`${userData.shortName}[${r[Math.floor(Math.random() * r.length)]}](${(point >= 0 ? '+' : '') + point}) (MP${userData.count})`);
     userData.tamashii += point;
     onTamashiiChange();
   };
   var rank = userData => {
     var n = userRank.indexOf(userData) + 1;
-    Bot.comment(`${userData.name}(${userData.tamashii})のランクは${n <= 0 ? '圏外' : n + '位'}です (残り${userData.count})`);
+    Bot.comment(`${userData.name}(${userData.tamashii})のランクは${n <= 0 ? '圏外' : n + '位'}です (MP${userData.count})`);
   };
-  var ranking = userData => Bot.comment('タマシイTOP3:' + userRank.slice(0, 3).map(d => `${d.shortName}(${d.tamashii})`).join(', ') + ` (残り${userData.count})`);
-  var nanni = (userData, {n}) => Bot.comment(`第${n}位は${userRank[--n] ? `${userRank[n].name}(${userRank[n].tamashii})です` : 'いません'} (残り${userData.count})`);
-  var season = (userData, {n}) => Bot.comment(`シーズン${n}タマシイTOP5:` + seasonData[n].slice(0, 5).map(d => `${d.shortName}(${d.tamashii})`).join(', ') + ` (残り${userData.count})`);
+  var ranking = userData => Bot.comment('タマシイTOP3:' + userRank.slice(0, 3).map(d => `${d.shortName}(${d.tamashii})`).join(', ') + ` (MP${userData.count})`);
+  var nanni = (userData, {n}) => Bot.comment(`第${n}位は${userRank[--n] ? `${userRank[n].name}(${userRank[n].tamashii})です` : 'いません'} (MP${userData.count})`);
+  var season = (userData, {n}) => Bot.comment(`シーズン${n}タマシイTOP5:` + seasonData[n].slice(0, 5).map(d => `${d.shortName}(${d.tamashii})`).join(', ') + ` (MP${userData.count})`);
   
   var kyuusai = async userData => {
     Bot.comment(`みんと「${userData.shortName}の魂(${userData.tamashii})を僕のｶｳﾝｾﾘﾝｸﾞでｱｾﾝｼｮﾝする？」10秒以内 数字回答 1.する 2.しない`);
@@ -52,13 +52,13 @@
     var ans = +(await listenTo(/^[12]$/, userData.id, 10000, true));
     if (ans === 1) {
       userData.tamashii = 0;
-      Bot.comment(`${userData.shortName}はｱｾﾝｼｮﾝした(0にリセット) (残り${userData.count})`);
+      Bot.comment(`${userData.shortName}はｱｾﾝｼｮﾝした(0にリセット) (MP${userData.count})`);
     } else if (ans === 2) {
       var add = Math.floor(Math.random() * -userData.tamashii * 2);
       userData.tamashii += add;
-      Bot.comment(`${userData.shortName}は自分を信じた(+${add}) (残り${userData.count})`);
+      Bot.comment(`${userData.shortName}は自分を信じた(+${add}) (MP${userData.count})`);
     } else {
-      Bot.comment(`時間切れ ${userData.shortName}は決断できなかった (残り${userData.count})`);
+      Bot.comment(`時間切れ ${userData.shortName}は決断できなかった (MP${userData.count})`);
       return;
     }
     onTamashiiChange();
@@ -72,7 +72,7 @@
     bc.postMessage([userData]);
     bet = Math.min(maxBet, +(await listenTo(/^[1-9]\d*$/, userData.id, 10000, true)));
     if (!bet) {
-      Bot.comment(`時間切れ ${userData.shortName}は決断できなかった (残り${userData.count})`);
+      Bot.comment(`時間切れ ${userData.shortName}は決断できなかった (MP${userData.count})`);
       return;
     }
     userData.tamashii -= bet;
@@ -98,7 +98,7 @@
       'ワンペア': 1,
       'はずれ': 0
     }[handRank] * bet;
-    Bot.comment(hand.toCardStrings().map(s => '[' + s + ']').join(' ') + ` ${handRank}(+${add}) (残り${userData.count})`);
+    Bot.comment(hand.toCardStrings().map(s => '[' + s + ']').join(' ') + ` ${handRank}(+${add}) (MP${userData.count})`);
     userData.tamashii += add;
     onTamashiiChange();
   };
@@ -107,7 +107,7 @@
     var text = seminarContents[Math.floor(Math.random() * seminarContents.length)];
     var tax = Math.floor(userData.tamashii / 2);
     userData.tamashii -= tax;
-    Bot.comment(`${userData.shortName}は魂の半分を支払い、みんと主催${text}セミナーを受講した　利益は4位以下に分配された(${-tax}) (残り${userData.count})`);
+    Bot.comment(`${userData.shortName}は魂の半分を支払い、みんと主催${text}セミナーを受講した　利益は4位以下に分配された(${-tax}) (MP${userData.count})`);
     var end = userRank.findIndex(userData => userData.tamashii <= 0);
     if (end < 0)
       end = userRank.length;
@@ -126,10 +126,10 @@
     Bot.comment(`江戸幕府は絵踏みを実施した 30秒以内に ${fumie} と発言しなければ魂が半分となる`);
     bc.postMessage([userData]);
     if (await listenTo(fumie, userData.id, 30000)) {
-      Bot.comment(`${userData.shortName}は保身に走った(+0) (残り${userData.count})`);
+      Bot.comment(`${userData.shortName}は保身に走った(+0) (MP${userData.count})`);
     } else {
       var add = -Math.floor(userData.tamashii / 2);
-      Bot.comment(`${userData.shortName}は名誉を保った(${add}) (残り${userData.count})`);
+      Bot.comment(`${userData.shortName}は名誉を保った(${add}) (MP${userData.count})`);
       userData.tamashii += add;
       onTamashiiChange();
     }
@@ -157,12 +157,12 @@
         bc.postMessage([playerData]);
         players.push({data: playerData, n: +user.cmt.slice(2)});
       } else {
-        Bot.stat('×残2未満 ' + playerData.shortName);
+        Bot.stat('×MP2未満 ' + playerData.shortName);
       }
     }
     Bot.stat('通常');
     if (!players.length) {
-      Bot.comment('誰も参加しなかった 言い出しっぺの残りは0になった');
+      Bot.comment('誰も参加しなかった 言い出しっぺのMPは0になった');
       userData.count = 0;
       return;
     }
@@ -227,7 +227,7 @@
       userData.time = time;
       userData.count = 4;
     } else if (userData.count <= 0) {
-      rejectResponse('残0');
+      rejectResponse('MP0');
       return;
     }
 
@@ -236,11 +236,11 @@
         rejectResponse('魂5以下');
         return;
       } else if (userData.count < 2) {
-        rejectResponse('残2未満');
+        rejectResponse('MP2未満');
         return;
       }
     } else if (game === yokubari && userData.count < 2) {
-      rejectResponse('残2未満');
+      rejectResponse('MP2未満');
       return;
     }
 

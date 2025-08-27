@@ -333,9 +333,9 @@
       formData.append('file', new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' }), fname);
       try {
         await fetch(url, {method: 'POST', body: formData});
-        Bot.stat('アップロード成功');
+        Bot.stat('保存成功');
       } catch (err) {
-        Bot.stat('アップロードエラー');
+        Bot.stat('保存エラー');
       }
     } else {
       Bot.stat('URL未登録');
@@ -393,10 +393,10 @@
         onTamashiiChange();
         Bot.stat('徳政令済');
         break;
-      case '魂アップロード':
+      case '魂保存':
         upload(userDataMap, 'tamashii.json');
         break;
-      case 'ログアップロード':
+      case 'ログ保存':
         upload(tamashiiLogs, 'log.json');
         break;
       case '🔒URL登録':

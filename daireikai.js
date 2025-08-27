@@ -179,7 +179,7 @@
         players[i].n *= -3;
       last.n *= -3;
     }
-    Bot.comment('結果:' + players.map(p => `${p.data.shortName}(${p.n})`).join(''));
+    Bot.comment('結果:' + players.map(p => `${p.data.shortName}(${p.n})`).join('') + ' 各MP-2');
     players = players.filter(p => p.data.id);
     players.forEach(p => p.data.tamashii += p.n);
     bc.postMessage(players.map(p => p.data));

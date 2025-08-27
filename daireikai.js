@@ -1,7 +1,17 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 4;
+  var VERSION = 5;
+  var MAX_LOG = 1000;
+  
+  var tamashiiLogs = [];
+  var logTamashii = (userData, note) => {
+    var log = Object.assign({timestamp: (new Date()).toLocaleString(), note}, userData);
+    delete log.name;
+    delete log.shortName;
+    tamashiiLogs.push(log);
+    tamashiiLogs.splice(0, tamashiiLogs.length - MAX_LOG);
+  };
   
   var seasonData = await Bot.loadAsync('daireikaiSeason') || [];
   
@@ -11,7 +21,7 @@
     var time = Math.floor(Date.now() / LIMIT);
     if (userData.time !== time) {
       userData.time = time;
-      userData.count = 4;
+      userData.count = 5;
     }
     return userData;
   };
@@ -265,10 +275,25 @@
     bc.postMessage([userData]);
     
   });
+  
+  var upload = async (obj, fname) => {
+    var url = await Bot.loadAsync('daireikaiWebhook');
+    if (url) {
+      var formData = new FormData();
+      formData.append('file', new Blob([JSON.stringify(obj)], { type: 'application/json' }), fname);
+      try {
+        await fetch(url, {method: 'POST', body: formData});
+      } catch (err) {
+        Bot.stat('アップロードエラー');
+      }
+    } else {
+      Bot.stat('URL未登録');
+    }
+  };
 
   on('COM', async user => {
   
-    if (!['SOW9cAv7B2', 'bbbbbbbbB.'].includes(user.trip))
+    if (user.id === Bot.myId || !['SOW9cAv7B2', 'bbbbbbbbB.'].includes(user.trip))
       return;
 
     var command = user.cmt.split(/\s+/);
@@ -286,9 +311,6 @@
         break;
       case 'BOT通常':
         Bot.stat('通常');
-        break;
-      case 'BOT時間':
-        Bot.stat(Date.now());
         break;
       case '魂バージョン':
         Bot.stat(VERSION);
@@ -316,10 +338,15 @@
         onTamashiiChange();
         Bot.stat('徳政令済');
         break;
-      case '🔒魂アップロード':
-        var formData = new FormData();
-        formData.append('file', new Blob([JSON.stringify(userDataMap)], { type: 'application/json' }), 'tamashii.json');
-        fetch(command[1], {method: 'POST', body: formData});
+      case '魂アップロード':
+        upload(userDataMap, 'tamashii.json');
+        break;
+      case 'ログアップロード':
+        upload(tamashiiLogs, 'log.json');
+        break;
+      case '🔒URL登録':
+        Bot.saveAsync('daireikaiWebhook', command[1]);
+        Bot.stat('登録完了');
         break;
     }
     

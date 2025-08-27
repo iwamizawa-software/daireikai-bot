@@ -39,6 +39,7 @@
       if (oldData?.tamashii !== userData.tamashii)
         rankChanged = true;
       Object.assign(oldData, userData);
+      logTamashii(userData, 'onmessage');
     });
     if (rankChanged)
       sortRank();
@@ -204,7 +205,49 @@
     onTamashiiChange();
   };
 
+  var poron = async userData => {
+    userData.count--;
+    Bot.comment(`全員参加可 状態：を使い1～100のランダムな数を1番先に当てる 40秒以内 (MP${userData.count})`);
+    Bot.stat('？');
+    var answer = Math.floor(Math.random() * 100) + 1;
+    var rank = [1000, 100, 50, 25, 12, 6];
+    var players = new Set();
+    var guessCount = 0;
+    var winner;
+    var startTime = Date.now();
+    while (true) {
+      var timeout = 40000 - Date.now() + startTime;
+      if (timeout <= 0)
+        break;
+      var user = await waitForStat(/^(?:[1-9]\d?|100)$/, '', timeout, true, true);
+      if (!user)
+        break;
+      players.add(user.ihash);
+      var guess = +user.stat;
+      if (guess === answer) {
+        winner = user;
+        break;
+      } else
+        Bot.stat(guess + 'より' + (guess > answer ? '小さい' : '大きい'));
+      guessCount++;
+    }
+    Bot.stat('通常');
+    if (winner) {
+      var winnerData = getUserData(winner.kuro || winner.shiro);
+      var add = (rank[guessCount] || 3) * players.size;
+      Bot.comment(`${winnerData.shortName}正解 ${answer}でした(+${add})`);
+      if (userData !== winnerData)
+        bc.postMessage([winnerData]);
+      onTamashiiChange();
+    } else {
+      Bot.comment('答えは' + answer + 'でした');
+    }
+  };
+
   on('COM', async user => {
+  
+    if (user.id === Bot.myId)
+      return;
   
     var rejectResponse = reason => Bot.stat('×id:' + user.id.slice(0, 3) + ' ' + reason);
   
@@ -219,6 +262,8 @@
       game = poker;
     else if (/^(?:欲|よく)[張ば]りげーむ$/i.test(cmt))
       game = yokubari;
+    else if (/^ぽろんげーむ$/i.test(cmt))
+      game = poron;
     else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:籤|くじ)$/.test(cmt))
       game = kuji;
     else if (/^(?:大霊界|だいれいかい|魂|たましい)の?らんく$/.test(cmt))
@@ -242,19 +287,23 @@
     var userData = getUserData(user.kuro || user.shiro);
     if (userData.count <= 0) {
       rejectResponse('MP0');
+      logTamashii(userData, 'mp0');
       return;
     }
 
     if (game === poker) {
       if (userData.tamashii <= 5) {
         rejectResponse('魂5以下');
+        logTamashii(userData, 'pokerTamashii5');
         return;
       } else if (userData.count < 2) {
         rejectResponse('MP2未満');
+        logTamashii(userData, 'pokerCount2');
         return;
       }
-    } else if (game === yokubari && userData.count < 2) {
+    } else if ((game === yokubari || game === poron) && userData.count < 2) {
       rejectResponse('MP2未満');
+      logTamashii(userData, 'poronCount2');
       return;
     }
 
@@ -273,6 +322,7 @@
     }
     await game(userData, options);
     bc.postMessage([userData]);
+    logTamashii(userData, cmt);
     
   });
   
@@ -280,7 +330,7 @@
     var url = await Bot.loadAsync('daireikaiWebhook');
     if (url) {
       var formData = new FormData();
-      formData.append('file', new Blob([JSON.stringify(obj)], { type: 'application/json' }), fname);
+      formData.append('file', new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' }), fname);
       try {
         await fetch(url, {method: 'POST', body: formData});
       } catch (err) {

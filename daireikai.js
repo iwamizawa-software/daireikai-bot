@@ -223,7 +223,7 @@
       if (!user)
         break;
       players.add(user.ihash);
-      var guess = +user.stat;
+      var guess = +Bot.normalize(user.stat);
       if (guess === answer) {
         winner = user;
         break;

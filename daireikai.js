@@ -6,7 +6,15 @@
   var seasonData = await Bot.loadAsync('daireikaiSeason') || [];
   
   var userDataMap = await Bot.loadAsync('daireikai') || {};
-  var getUserData = id => userDataMap[id] || (userDataMap[id] = {id, tamashii: 0});
+  var getUserData = id => {
+    var userData = userDataMap[id] || (userDataMap[id] = {id, tamashii: 0});
+    var time = Math.floor(Date.now() / LIMIT);
+    if (userData.time !== time) {
+      userData.time = time;
+      userData.count = 4;
+    }
+    return userData;
+  };
   
   var userRank;
   var sortRank = () => userRank = Object.values(userDataMap).sort((a, b) => b.tamashii - a.tamashii);
@@ -138,7 +146,7 @@
   var yokubari = async userData => {
     userData.count++;
     Bot.comment('全員参加可 BOTに暗号化を使い40秒以内に1～100で好きな数を発言');
-    Bot.comment('その数を得点とする 但し1番大きい数の人は-1倍 1番小さい数の人は-3倍');
+    Bot.comment('その数を得点とする 但し1番大きい数の人は-1倍 1番小さい数の人は-2倍');
     var players = [];
     var startTime = Date.now();
     while (true) {
@@ -176,8 +184,8 @@
     var last = players.at(-1);
     if (last.n > 0) {
       for (var i = players.length - 2; i >= 0 && last.n === players[i].n; i--)
-        players[i].n *= -3;
-      last.n *= -3;
+        players[i].n *= -2;
+      last.n *= -2;
     }
     Bot.comment('結果:' + players.map(p => `${p.data.shortName}(${p.n})`).join('') + ' 各MP-2');
     players = players.filter(p => p.data.id);
@@ -222,11 +230,7 @@
       return;
 
     var userData = getUserData(user.kuro || user.shiro);
-    var time = Math.floor(Date.now() / LIMIT);
-    if (userData.time !== time) {
-      userData.time = time;
-      userData.count = 4;
-    } else if (userData.count <= 0) {
+    if (userData.count <= 0) {
       rejectResponse('MP0');
       return;
     }

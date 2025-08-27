@@ -300,6 +300,15 @@
         bc.postMessage([userData]);
         Bot.stat('不正完了');
         break;
+      case '魂徳政令':
+        var n = +command[1];
+        userRank.forEach(d => {
+          if (d.tamashii < n)
+            d.tamashii = n;
+        });
+        onTamashiiChange();
+        Bot.stat('徳政令済');
+        break;
       case '🔒魂アップロード':
         var formData = new FormData();
         formData.append('file', new Blob([JSON.stringify(userDataMap)], { type: 'application/json' }), 'tamashii.json');

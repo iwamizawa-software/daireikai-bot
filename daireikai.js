@@ -333,6 +333,7 @@
       formData.append('file', new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' }), fname);
       try {
         await fetch(url, {method: 'POST', body: formData});
+        Bot.stat('アップロード成功');
       } catch (err) {
         Bot.stat('アップロードエラー');
       }
@@ -355,9 +356,13 @@
       case 'BOTリロード':
         location.reload();
         break;
-      case 'BOT移動':
+      case 'BOT部屋':
         location.href = '#/room/' + (command[1] || 1);
         location.reload();
+        break;
+      case 'BOT移動':
+        var {x, y} = user;
+        Bot.set({x, y});
         break;
       case 'BOT通常':
         Bot.stat('通常');

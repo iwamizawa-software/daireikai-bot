@@ -301,9 +301,9 @@
         Bot.stat('不正完了');
         break;
       case '魂徳政令':
-        var n = +command[1];
+        var n = +command[1] || 0;
         userRank.forEach(d => {
-          if (d.tamashii < n)
+          if (isNaN(d.tamashii) || d.tamashii < n)
             d.tamashii = n;
         });
         onTamashiiChange();

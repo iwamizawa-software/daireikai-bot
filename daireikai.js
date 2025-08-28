@@ -282,9 +282,9 @@
       game = yokubari;
     else if (/^ぽろんげーむ$/i.test(cmt))
       game = poron;
-    else if (/^(?:のんち|むじんくん|nonn?ti)(?:ありがとう|すごい|えらい|偉い|(?:大|だい)(?:好|す|しゅ)き)$/i.test(cmt))
+    else if (/^(?:のんち|むじんくん|nonn?ti)(?:ありがとう|すごい|えらい|偉い|(?:大|だい)?(?:好|す|しゅ)き)$/i.test(cmt))
       game = nonti;
-    else if (/^(?:n|えぬ)たそ(?:ありがとう|すごい|えらい|偉い|(?:大|だい)(?:好|す|しゅ)き)$/i.test(cmt))
+    else if (/^(?:n|えぬ)たそ(?:ありがとう|すごい|えらい|偉い|(?:大|だい)?(?:好|す|しゅ)き)$/i.test(cmt))
       game = ntaso;
     else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:籤|くじ)$/.test(cmt))
       game = kuji;

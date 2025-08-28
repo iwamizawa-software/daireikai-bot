@@ -1,7 +1,7 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 5;
+  var VERSION = 6;
   var MAX_LOG = 1000;
   
   var tamashiiLogs = [];
@@ -236,6 +236,7 @@
       var winnerData = getUserData(winner.kuro || winner.shiro);
       var add = (rank[guessCount] || 3) * players.size;
       Bot.comment(`${winnerData.shortName}正解 ${answer}でした(+${add})`);
+      winnerData.tamashii += add;
       if (userData !== winnerData)
         bc.postMessage([winnerData]);
       onTamashiiChange();

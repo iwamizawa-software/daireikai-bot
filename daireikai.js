@@ -1,7 +1,7 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 6;
+  var VERSION = 7;
   var MAX_LOG = 1000;
   
   var tamashiiLogs = [];
@@ -252,6 +252,15 @@
     userData.tamashii += 10;
     onTamashiiChange();
   };
+  
+  var ntaso = userData => {
+    var add = -10;
+    if (Math.random() < 1 / 319)
+      add = 50 + Math.floor(Math.random() * 51);
+    Bot.comment(`どういたしまして ${userData.shortName}(${(add >= 0 ? '+' : '') + add}) (MP${userData.count})`);
+    userData.tamashii += add;
+    onTamashiiChange();
+  };
 
   on('COM', async user => {
   
@@ -275,6 +284,8 @@
       game = poron;
     else if (/^(?:のんち|むじんくん|nonn?ti)(?:ありがとう|すごい|えらい|偉い|(?:大|だい)(?:好|す|しゅ)き)$/i.test(cmt))
       game = nonti;
+    else if (/^(?:n|えぬ)たそ(?:ありがとう|すごい|えらい|偉い|(?:大|だい)(?:好|す|しゅ)き)$/i.test(cmt))
+      game = ntaso;
     else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:籤|くじ)$/.test(cmt))
       game = kuji;
     else if (/^(?:大霊界|だいれいかい|魂|たましい)の?らんく$/.test(cmt))

@@ -237,12 +237,20 @@
       var add = (rank[guessCount] || 3) * players.size;
       Bot.comment(`${winnerData.shortName}正解 ${answer}でした(+${add})`);
       winnerData.tamashii += add;
-      if (userData !== winnerData)
+      if (userData !== winnerData) {
         bc.postMessage([winnerData]);
+        logTamashii(winnerData, 'poronWinner');
+      }
       onTamashiiChange();
     } else {
       Bot.comment('答えは' + answer + 'でした');
     }
+  };
+  
+  var nonti = userData => {
+    Bot.comment(`うむ ${userData.shortName}(+10) (MP${userData.count})`);
+    userData.tamashii += 10;
+    onTamashiiChange();
   };
 
   on('COM', async user => {
@@ -265,6 +273,8 @@
       game = yokubari;
     else if (/^ぽろんげーむ$/i.test(cmt))
       game = poron;
+    else if (/^(?:のんち|むじんくん|nonn?ti)(?:ありがとう|すごい|えらい|偉い|(?:大|だい)(?:好|す|しゅ)き)$/i.test(cmt))
+      game = nonti;
     else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:籤|くじ)$/.test(cmt))
       game = kuji;
     else if (/^(?:大霊界|だいれいかい|魂|たましい)の?らんく$/.test(cmt))
@@ -386,13 +396,21 @@
         Bot.stat('不正完了');
         break;
       case '魂徳政令':
+        await upload(userDataMap, 'tamashii.json');
         var n = +command[1] || 0;
         userRank.forEach(d => {
           if (isNaN(d.tamashii) || d.tamashii < n)
             d.tamashii = n;
         });
         onTamashiiChange();
-        Bot.stat('徳政令済');
+        Bot.stat(`${n}未満徳政令済`);
+        break;
+      case '魂詫び石':
+        await upload(userDataMap, 'tamashii.json');
+        var n = +command[1] || 100;
+        userRank.forEach(d => d.tamashii += n);
+        onTamashiiChange();
+        Bot.stat(`詫び石${n}配布済`);
         break;
       case '魂保存':
         upload(userDataMap, 'tamashii.json');

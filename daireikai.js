@@ -124,9 +124,9 @@
   
   var seminar = userData => {
     var text = seminarContents[Math.floor(Math.random() * seminarContents.length)];
-    var tax = Math.floor(userData.tamashii / 2);
+    var tax = Math.floor(userData.tamashii * 0.1);
     userData.tamashii -= tax;
-    Bot.comment(`${userData.shortName}は魂の半分を支払い、みんと主催${text}セミナーを受講した　利益は4位以下に分配された(${-tax}) (MP${userData.count})`);
+    Bot.comment(`${userData.shortName}は魂の10%を支払い、みんと主催${text}セミナーを受講した　利益は4位以下に分配された(${-tax}) (MP${userData.count})`);
     var end = userRank.findIndex(userData => userData.tamashii <= 0);
     if (end < 0)
       end = userRank.length;

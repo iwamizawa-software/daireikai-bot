@@ -12,16 +12,27 @@
     tamashiiLogs.push(log);
     tamashiiLogs.splice(0, tamashiiLogs.length - MAX_LOG);
   };
+
+  var nonCommandLogs = [];
+  var logNonCommand = ({id, fullName, cmt} = {}) => {
+    nonCommandLogs.push({timestamp: (new Date()).toLocaleString(), id, fullName, cmt});
+    nonCommandLogs.splice(0, nonCommandLogs.length - MAX_LOG);
+  };
   
   var seasonData = await Bot.loadAsync('daireikaiSeason') || [];
   
   var userDataMap = await Bot.loadAsync('daireikai') || {};
-  var getUserData = id => {
+  var getUserData = user => {
+    var id = typeof user === 'string' ? user : (user.kuro || user.shiro);
     var userData = userDataMap[id] || (userDataMap[id] = {id, tamashii: 0});
     var time = Math.floor(Date.now() / LIMIT);
     if (userData.time !== time) {
       userData.time = time;
       userData.count = 5;
+    }
+    if (user.name) {
+      userData.shortName = user.name.replace(/◇.{6}$/, '');
+      userData.name = userData.shortName + id;
     }
     return userData;
   };
@@ -154,57 +165,6 @@
       onTamashiiChange();
     }
   };
-  
-  var yokubari = async userData => {
-    userData.count++;
-    Bot.comment('全員参加可 BOTに暗号化を使い40秒以内に1～100で好きな数を発言');
-    Bot.comment('その数を得点とする 但し1番大きい数の人は-1倍 1番小さい数の人は-2倍');
-    var players = [];
-    var startTime = Date.now();
-    while (true) {
-      var timeout = 40000 - Date.now() + startTime;
-      if (timeout <= 0)
-        break;
-      var user = await listenTo(/^🔒(?:[1-9]\d?|100)$/, '', timeout, true, true);
-      if (!user)
-        break;
-      var playerData = getUserData(user.kuro || user.shiro);
-      if (players.some(p => p.data === playerData))
-        continue;
-      if (playerData.count >= 2) {
-        playerData.count -= 2;
-        Bot.stat('参加 ' + playerData.shortName);
-        bc.postMessage([playerData]);
-        players.push({data: playerData, n: +user.cmt.slice(2)});
-      } else {
-        Bot.stat('×MP2未満 ' + playerData.shortName);
-      }
-    }
-    Bot.stat('通常');
-    if (!players.length) {
-      Bot.comment('誰も参加しなかった 言い出しっぺのMPは0になった');
-      userData.count = 0;
-      return;
-    }
-    var offset = [1, 51][Math.floor(Math.random() * 2)];
-    while (players.length < 4)
-      players.push({data: {shortName: 'bot'}, n: Math.floor(Math.random() * 50) + offset});
-    players.sort((a, b) => b.n - a.n);
-    for (var i = 1; i < players.length && players[0].n === players[i].n; i++)
-      players[i].n *= -1;
-    players[0].n *= -1;
-    var last = players.at(-1);
-    if (last.n > 0) {
-      for (var i = players.length - 2; i >= 0 && last.n === players[i].n; i--)
-        players[i].n *= -2;
-      last.n *= -2;
-    }
-    Bot.comment('結果:' + players.map(p => `${p.data.shortName}(${p.n})`).join('') + ' 各MP-2');
-    players = players.filter(p => p.data.id);
-    players.forEach(p => p.data.tamashii += p.n);
-    bc.postMessage(players.map(p => p.data));
-    onTamashiiChange();
-  };
 
   var poron = async userData => {
     userData.count--;
@@ -234,7 +194,7 @@
     }
     Bot.stat('通常');
     if (winner) {
-      var winnerData = getUserData(winner.kuro || winner.shiro);
+      var winnerData = getUserData(winner);
       var add = (rank[guessCount] || 3) * players.size;
       Bot.comment(`${winnerData.shortName}正解 ${answer}でした(+${add})`);
       winnerData.tamashii += add;
@@ -262,6 +222,13 @@
     userData.tamashii += add;
     onTamashiiChange();
   };
+  
+  var kinku = userData => {
+    Bot.stat(`${userData.shortName} -1000 MP0`);
+    userData.tamashii -= 1000;
+    userData.count = 0;
+    onTamashiiChange();
+  };
 
   on('COM', async user => {
   
@@ -276,17 +243,17 @@
     }
     
     var cmt = Bot.normalize(user.cmt);
-    var game;
+    var game, options;
     if (/^(?:ぽーかー|poker)\s*([1-9]\d?)?$/i.test(cmt)) {
       game = poker;
       if (RegExp.$1)
         options = {bet: +RegExp.$1};
-    } else if (/^(?:欲|よく)[張ば]りげーむ$/i.test(cmt))
-      game = yokubari;
-    else if (/^ぽろんげーむ$/i.test(cmt))
+    } else if (/^ぽろんげーむ$/i.test(cmt))
       game = poron;
     else if (/^(?:のんち|むじんくん|nonn?ti)(?:ありがとう|すごい|えらい|偉い|(?:大|だい)?(?:好|す|しゅ|ちゅ)き)$/i.test(cmt))
       game = nonti;
+    else if (/^(?:のんち|むじんくん|nonn?ti)(?:[\u3057\u6B7B\u6C0F]ね|[\u3058\u81EA](?:\u5BB3|\u6BBA|\u304C\u3044|\u3055\u3064)しろ)や?$/i.test(cmt))
+      game = kinku;
     else if (/^(?:n|えぬ)たそ(?:ありがとう|すごい|えらい|偉い|(?:大|だい)?(?:好|す|しゅ|ちゅ)き)$/i.test(cmt))
       game = ntaso;
     else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:籤|くじ)$/.test(cmt))
@@ -305,11 +272,13 @@
         return;
       }
       game = season;
-      var options = {n};
-    } else
+      options = {n};
+    } else {
+      logNonCommand(user);
       return;
+    }
 
-    var userData = getUserData(user.kuro || user.shiro);
+    var userData = getUserData(user);
     if (userData.count <= 0) {
       rejectResponse('MP0');
       logTamashii(userData, 'mp0');
@@ -326,7 +295,7 @@
         logTamashii(userData, 'pokerCount2');
         return;
       }
-    } else if ((game === yokubari || game === poron) && userData.count < 2) {
+    } else if (game === poron && userData.count < 2) {
       rejectResponse('MP2未満');
       logTamashii(userData, 'poronCount2');
       return;
@@ -334,16 +303,15 @@
 
     Bot.stat('通常');
     userData.count--;
-    userData.shortName = user.name.replace(/◇.{6}$/, '');
-    userData.name = userData.shortName + (user.kuro || user.shiro);
 
-    if (Math.random() < 0.1) {
+    if (game !== kinku && Math.random() < 0.1) {
       if (userData.tamashii < -5)
         game = kyuusai;
       else if (userRank[0] === userData)
         game = seminar;
       else if (userData.tamashii > 0 && userRank.slice(1, 3).includes(userData))
         game = ebumi;
+      cmt += 'レアイベント';
     }
     await game(userData, options);
     bc.postMessage([userData]);
@@ -361,10 +329,13 @@
         Bot.stat('保存成功');
       } catch (err) {
         Bot.stat('保存エラー');
+        return false;
       }
     } else {
       Bot.stat('URL未登録');
+      return false;
     }
+    return true;
   };
 
   on('COM', async user => {
@@ -396,11 +367,13 @@
         Bot.stat(VERSION);
         break;
       case '魂出禁':
-        denyList.add(command[1]);
-        Bot.stat('出禁完了');
-        break;
-      case '魂出禁解除':
-        Bot.stat(denyList.delete(command[1]) ? '解除完了' : '出禁リストにない');
+        if (denyList.has(command[1])) {
+          denyList.delete(command[1]);
+          Bot.stat('解除完了');
+        } else {
+          denyList.add(command[1]);
+          Bot.stat('出禁完了');
+        }
         break;
       case '魂不正':
         var userData = getUserData(command[1]);
@@ -429,8 +402,14 @@
       case '魂保存':
         upload(userDataMap, 'tamashii.json');
         break;
-      case 'ログ保存':
-        upload(tamashiiLogs, 'log.json');
+      case '魂ログ保存':
+        upload(tamashiiLogs, 'tamashii-log.json');
+        break;
+      case '発言ログ保存':
+        upload(nonCommandLogs, 'non-command-log.json');
+        break;
+      case '全保存':
+        Bot.stat(await upload(userDataMap, 'tamashii.json') && await upload(tamashiiLogs, 'tamashii-log.json') && await upload(nonCommandLogs, 'non-command-log.json') ? '全保存成功' : '全保存失敗');
         break;
       case '🔒URL登録':
         Bot.saveAsync('daireikaiWebhook', command[1]);

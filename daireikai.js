@@ -83,13 +83,14 @@
     onTamashiiChange();
   };
   
-  var poker = async userData => {
+  var poker = async (userData, {bet} = {}) => {
     userData.count--;
-    var bet = 1;
     var maxBet = Math.min(userData.tamashii, 50);
-    Bot.comment(`BETする${userData.shortName}の魂を1～${maxBet}の間で10秒以内に回答`);
-    bc.postMessage([userData]);
-    bet = Math.min(maxBet, +(await listenTo(/^[1-9]\d*$/, userData.id, 10000, true)));
+    if (!bet) {
+      Bot.comment(`BETする${userData.shortName}の魂を1～${maxBet}の間で10秒以内に回答`);
+      bc.postMessage([userData]);
+    }
+    bet = Math.min(maxBet, bet || +(await listenTo(/^[1-9]\d*$/, userData.id, 10000, true)));
     if (!bet) {
       Bot.comment(`時間切れ ${userData.shortName}は決断できなかった (MP${userData.count})`);
       return;
@@ -276,15 +277,17 @@
     
     var cmt = Bot.normalize(user.cmt);
     var game;
-    if (/^(?:ぽーかー|poker)$/i.test(cmt))
+    if (/^(?:ぽーかー|poker)\s*([1-9]\d?)?$/i.test(cmt)) {
       game = poker;
-    else if (/^(?:欲|よく)[張ば]りげーむ$/i.test(cmt))
+      if (RegExp.$1)
+        options = {bet: +RegExp.$1};
+    } else if (/^(?:欲|よく)[張ば]りげーむ$/i.test(cmt))
       game = yokubari;
     else if (/^ぽろんげーむ$/i.test(cmt))
       game = poron;
-    else if (/^(?:のんち|むじんくん|nonn?ti)(?:ありがとう|すごい|えらい|偉い|(?:大|だい)?(?:好|す|しゅ)き)$/i.test(cmt))
+    else if (/^(?:のんち|むじんくん|nonn?ti)(?:ありがとう|すごい|えらい|偉い|(?:大|だい)?(?:好|す|しゅ|ちゅ)き)$/i.test(cmt))
       game = nonti;
-    else if (/^(?:n|えぬ)たそ(?:ありがとう|すごい|えらい|偉い|(?:大|だい)?(?:好|す|しゅ)き)$/i.test(cmt))
+    else if (/^(?:n|えぬ)たそ(?:ありがとう|すごい|えらい|偉い|(?:大|だい)?(?:好|す|しゅ|ちゅ)き)$/i.test(cmt))
       game = ntaso;
     else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:籤|くじ)$/.test(cmt))
       game = kuji;

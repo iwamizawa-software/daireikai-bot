@@ -1,7 +1,7 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 7;
+  var VERSION = 8;
   var MAX_LOG = 1000;
   
   var tamashiiLogs = [];
@@ -9,6 +9,8 @@
     var log = Object.assign({timestamp: (new Date()).toLocaleString(), note}, userData);
     delete log.name;
     delete log.shortName;
+    delete log.achievementMap;
+    log.achievements = Object.keys(userData.achievementMap || {}).join(',');
     tamashiiLogs.push(log);
     tamashiiLogs.splice(0, tamashiiLogs.length - MAX_LOG);
   };
@@ -28,12 +30,16 @@
     var time = Math.floor(Date.now() / LIMIT);
     if (userData.time !== time) {
       userData.time = time;
-      userData.count = 5;
+      userData.count = Math.max(5, userData.count || 0);
     }
     if (user.name) {
       userData.shortName = user.name.replace(/◇.{6}$/, '');
       userData.name = userData.shortName + id;
     }
+    if (!userData.achievementMap)
+      userData.achievementMap = {};
+    if (!userData.nCount)
+      userData.nCount = 0;
     return userData;
   };
   
@@ -61,11 +67,29 @@
     Bot.saveAsync('daireikai', userDataMap);
   };
   
+  var formatPoint = n => `(${(n >= 0 ? '+' : '') + n})`;
+  
+  var unlockAchievement = (userData, achievementName, options = {}) => {
+    if (userData.achievementMap[achievementName])
+      return;
+    userData.achievementMap[achievementName] = Date.now();
+    if (options.addTamashii)
+      userData.tamashii += options.addTamashii;
+    if (options.addCount)
+      userData.count += options.addCount;
+    Bot.comment(`${userData.shortName} 実績解除:${achievementName}` + (options.addTamashii ? formatPoint(options.addTamashii) : '') + (options.addCount ? ` (MP${userData.count})` : ''));
+  };
+  var showAchievements = userData => Bot.comment(`${userData.shortName}の実績:` + Object.keys(userData.achievementMap).join(',') + ` (MP${userData.count})`);
+  var showAchievementHolders = (userData, {name} = {}) => Bot.comment(`${name}達成者:` + userRank.filter(d => d.achievementMap?.hasOwnProperty(name)).map(d => d.shortName || d.id).join(',') + ` (MP${userData.count})`);
+  
   var kuji = userData => {
     var r = Bot.kuji(...daireikaiKujiArguments).slice();
-    var point = r.shift();
-    Bot.comment(`${userData.shortName}[${r[Math.floor(Math.random() * r.length)]}](${(point >= 0 ? '+' : '') + point}) (MP${userData.count})`);
-    userData.tamashii += point;
+    var add = r.shift();
+    var text = r[Math.floor(Math.random() * r.length)];
+    Bot.comment(`${userData.shortName}[${text}]${formatPoint(add)} (MP${userData.count})`);
+    userData.tamashii += add;
+    if (text.startsWith('ほぉ～'))
+      unlockAchievement(userData, 'ほろべソング', {addCount: 2});
     onTamashiiChange();
   };
   var rank = userData => {
@@ -116,7 +140,7 @@
     var remove = '01234'.split('').filter(n => !hold.includes(n));
     hand.removeAt(remove).append(deck.draw(remove.length));
     var handRank = hand.getHandRank() || 'はずれ';
-    var add = {
+    var rate = {
       'ファイブカード': 1000,
       'ロイヤルフラッシュ': 500,
       'ストレートフラッシュ': 100,
@@ -128,9 +152,12 @@
       'ツーペア': 2,
       'ワンペア': 1,
       'はずれ': 0
-    }[handRank] * bet;
+    }[handRank];
+    var add = rate * bet;
     Bot.comment(hand.toCardStrings().map(s => '[' + s + ']').join(' ') + ` ${handRank}(+${add}) (MP${userData.count})`);
     userData.tamashii += add;
+    if (rate > 3)
+      unlockAchievement(userData, handRank);
     onTamashiiChange();
   };
   
@@ -148,6 +175,7 @@
       var recipients = userRank.slice(3, end);
       recipients.forEach(d => d.tamashii += add);
       bc.postMessage(recipients);
+      unlockAchievement(userData, '慈善家');
     }
     onTamashiiChange();
   };
@@ -162,6 +190,7 @@
       var add = -Math.floor(userData.tamashii / 2);
       Bot.comment(`${userData.shortName}は名誉を保った(${add}) (MP${userData.count})`);
       userData.tamashii += add;
+      unlockAchievement(userData, '屈しない人');
       onTamashiiChange();
     }
   };
@@ -171,7 +200,8 @@
     Bot.comment(`全員参加可 状態：を使い1～100のランダムな数を1番先に当てる 40秒以内 (MP${userData.count})`);
     Bot.stat('？');
     var answer = Math.floor(Math.random() * 100) + 1;
-    var rank = [1000, 100, 50, 25, 12, 6];
+    console.log('poron game:' + answer);
+    var rank = [1000, 100, 50, 25, 12];
     var players = new Set();
     var guessCount = 0;
     var winner;
@@ -195,9 +225,11 @@
     Bot.stat('通常');
     if (winner) {
       var winnerData = getUserData(winner);
-      var add = (rank[guessCount] || 3) * players.size;
+      var add = (rank[guessCount] || 10) * players.size;
       Bot.comment(`${winnerData.shortName}正解 ${answer}でした(+${add})`);
       winnerData.tamashii += add;
+      if (guessCount === 0)
+        unlockAchievement(winnerData, '名誉ぽろん人');
       if (userData !== winnerData) {
         bc.postMessage([winnerData]);
         logTamashii(winnerData, 'poronWinner');
@@ -211,6 +243,9 @@
   var nonti = userData => {
     Bot.comment(`うむ ${userData.shortName}(+10) (MP${userData.count})`);
     userData.tamashii += 10;
+    userData.nCount++;
+    if (userData.nCount >= 10)
+      unlockAchievement(userData, '作者に感謝', {addCount: 2});
     onTamashiiChange();
   };
   
@@ -218,8 +253,10 @@
     var add = -10;
     if (Math.random() < 1 / 319)
       add = 50 + Math.floor(Math.random() * 51);
-    Bot.comment(`どういたしまして ${userData.shortName}(${(add >= 0 ? '+' : '') + add}) (MP${userData.count})`);
+    Bot.comment(`どういたしまして ${userData.shortName}${formatPoint(add)} (MP${userData.count})`);
     userData.tamashii += add;
+    if (add > 0)
+      unlockAchievement(userData, 'ギャンブラー');
     onTamashiiChange();
   };
   
@@ -227,6 +264,7 @@
     Bot.stat(`${userData.shortName} -1000 MP0`);
     userData.tamashii -= 1000;
     userData.count = 0;
+    unlockAchievement(userData, 'れたｓ');
     onTamashiiChange();
   };
 
@@ -262,7 +300,12 @@
       game = rank;
     else if (/^(?:大霊界|だいれいかい|魂|たましい)の?らんきんぐ$/.test(cmt))
       game = ranking;
-    else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:第|だい)?([1-9]\d*)(?:位|い)は?(?:だれ|誰)?\??$/.test(cmt)) {
+    else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:実績|じっせき)$/.test(cmt))
+      game = showAchievements;
+    else if (/^(.+)の?(?:達成者|たっせいしゃ)$/.test(user.cmt)) {
+      game = showAchievementHolders;
+      options = {name: RegExp.$1};
+    } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:第|だい)?([1-9]\d*)(?:位|い)は?(?:だれ|誰)?\??$/.test(cmt)) {
       game = nanni;
       var options = {n: RegExp.$1};
     } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?しーずん(\d+)$/.test(cmt)) {
@@ -377,7 +420,7 @@
         break;
       case '魂不正':
         var userData = getUserData(command[1]);
-        userData[command[2]] = +command[3];
+        userData[command[2]] = JSON.parse(command[3]);
         onTamashiiChange();
         bc.postMessage([userData]);
         Bot.stat('不正完了');

@@ -1,7 +1,7 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 8;
+  var VERSION = 9;
   var MAX_LOG = 1000;
   
   var tamashiiLogs = [];

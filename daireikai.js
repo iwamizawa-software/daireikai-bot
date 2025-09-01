@@ -163,9 +163,9 @@
   
   var seminar = userData => {
     var text = seminarContents[Math.floor(Math.random() * seminarContents.length)];
-    var tax = Math.floor(userData.tamashii * 0.1);
+    var tax = Math.min(700, Math.floor(userData.tamashii * 0.1));
     userData.tamashii -= tax;
-    Bot.comment(`${userData.shortName}は魂の10%を支払い、みんと主催${text}セミナーを受講した　利益は4位以下に分配された(${-tax}) (MP${userData.count})`);
+    Bot.comment(`${userData.shortName}は魂${tax}を支払い、みんと主催${text}セミナーを受講した 利益は4位以下に分配された (MP${userData.count})`);
     var end = userRank.findIndex(userData => userData.tamashii <= 0);
     if (end < 0)
       end = userRank.length;
@@ -252,11 +252,13 @@
   var ntaso = userData => {
     var add = -10;
     if (Math.random() < 1 / 319)
-      add = 50 + Math.floor(Math.random() * 51);
+      add = 3180;
     Bot.comment(`どういたしまして ${userData.shortName}${formatPoint(add)} (MP${userData.count})`);
     userData.tamashii += add;
     if (add > 0)
       unlockAchievement(userData, 'ギャンブラー');
+    else
+      getUserData('◆Ntaso.Mads').tamashii -= add;
     onTamashiiChange();
   };
   
@@ -268,9 +270,10 @@
     onTamashiiChange();
   };
 
+  var pause;
   on('COM', async user => {
   
-    if (user.id === Bot.myId)
+    if (pause || user.id === Bot.myId)
       return;
   
     var rejectResponse = reason => Bot.stat('×id:' + user.id.slice(0, 3) + ' ' + reason);
@@ -347,12 +350,13 @@
     Bot.stat('通常');
     userData.count--;
 
-    if (game !== kinku && Math.random() < 0.1) {
+    if (game === poker && userRank[0] === userData && Math.random() < 0.05) {
+      game = seminar;
+      cmt += 'セミナー';
+    } else if (game !== kinku && Math.random() < 0.1) {
       if (userData.tamashii < -5)
         game = kyuusai;
-      else if (userRank[0] === userData)
-        game = seminar;
-      else if (userData.tamashii > 0 && userRank.slice(1, 3).includes(userData))
+      else if (userData.tamashii > 0 && userRank.slice(0, 3).includes(userData) && !userData.achievementMap['屈しない人'])
         game = ebumi;
       cmt += 'レアイベント';
     }
@@ -405,6 +409,9 @@
         break;
       case 'BOT通常':
         Bot.stat('通常');
+        break;
+      case '魂停止':
+        Bot.stat((pause = !pause) ? '大霊界BOT停止中' : '通常');
         break;
       case '魂バージョン':
         Bot.stat(VERSION);

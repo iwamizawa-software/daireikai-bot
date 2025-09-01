@@ -469,6 +469,6 @@
     
   });
   
-  Bot.stat('大霊界BOT停止中');
+  setTimeout(() => Bot.stat('大霊界BOT停止中'), 5000);
 
 })();

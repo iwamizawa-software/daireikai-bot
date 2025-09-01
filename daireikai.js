@@ -257,8 +257,11 @@
     userData.tamashii += add;
     if (add > 0)
       unlockAchievement(userData, 'ギャンブラー');
-    else
-      getUserData('◆Ntaso.Mads').tamashii -= add;
+    else {
+      var nData = getUserData('◆Ntaso.Mads');
+      nData.tamashii -= add;
+      bc.postMessage([nData]);
+    }
     onTamashiiChange();
   };
   

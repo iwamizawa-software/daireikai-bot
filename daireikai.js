@@ -270,7 +270,7 @@
     onTamashiiChange();
   };
 
-  var pause;
+  var pause = true;
   on('COM', async user => {
   
     if (pause || user.id === Bot.myId)
@@ -468,5 +468,7 @@
     }
     
   });
+  
+  Bot.stat('大霊界BOT停止中');
 
 })();

@@ -1,7 +1,7 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 10;
+  var VERSION = 11;
   var MAX_LOG = 1000;
   
   var tamashiiLogs = [];
@@ -17,8 +17,8 @@
 
   var nonCommandLogs = [];
   var logNonCommand = ({id, fullName, cmt} = {}) => {
-//    if (cmt?.startsWith('***'))
-//      return;
+    if (cmt?.startsWith('***'))
+      return;
     nonCommandLogs.push({timestamp: (new Date()).toLocaleString(), id, fullName, cmt});
     nonCommandLogs.splice(0, nonCommandLogs.length - MAX_LOG);
   };

@@ -17,7 +17,7 @@
 
   var nonCommandLogs = [];
   var logNonCommand = ({id, fullName, cmt} = {}) => {
-    if (cmt === '***')
+    if (cmt?.startsWith('***'))
       return;
     nonCommandLogs.push({timestamp: (new Date()).toLocaleString(), id, fullName, cmt});
     nonCommandLogs.splice(0, nonCommandLogs.length - MAX_LOG);

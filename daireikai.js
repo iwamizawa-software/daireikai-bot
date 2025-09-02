@@ -361,11 +361,13 @@
       game = seminar;
       cmt += 'セミナー';
     } else if (game !== kinku && Math.random() < 0.1) {
+      var prev = game;
       if (userData.tamashii < -5)
         game = kyuusai;
       else if (userData.tamashii > 0 && userRank.slice(0, 3).includes(userData) && !userData.achievementMap['屈しない人'])
         game = ebumi;
-      cmt += 'レアイベント';
+      if (prev !== game)
+        cmt += 'レアイベント';
     }
     await game(userData, options);
     bc.postMessage([userData]);

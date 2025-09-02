@@ -17,6 +17,8 @@
 
   var nonCommandLogs = [];
   var logNonCommand = ({id, fullName, cmt} = {}) => {
+    if (cmt === '***')
+      return;
     nonCommandLogs.push({timestamp: (new Date()).toLocaleString(), id, fullName, cmt});
     nonCommandLogs.splice(0, nonCommandLogs.length - MAX_LOG);
   };
@@ -290,11 +292,11 @@
     
     var cmt = Bot.normalize(user.cmt);
     var game, options;
-    if (/^(?:ぽーかー|poker)\s*([1-9]\d?)?$/i.test(cmt)) {
+    if (/^\s*(?:ぽーかー|poker)\s*([1-9]\d?)?\s*$/i.test(cmt)) {
       game = poker;
       if (RegExp.$1)
         options = {bet: +RegExp.$1};
-    } else if (/^ぽろんげーむ$/i.test(cmt))
+    } else if (/^\s*ぽろんげーむ\s*$/i.test(cmt))
       game = poron;
     else if (/^(?:のんち|むじんくん|nonn?ti)(?:ありがとう|すごい|えらい|偉い|(?:大|だい)?(?:好|す|しゅ|ちゅ)き)$/i.test(cmt))
       game = nonti;

@@ -260,6 +260,8 @@
     else {
       var nData = getUserData('◆Ntaso.Mads');
       nData.tamashii -= add;
+      if (userData === nData)
+        return;
       bc.postMessage([nData]);
     }
     onTamashiiChange();
@@ -388,6 +390,7 @@
     return true;
   };
 
+  var botStartTime = new Date();
   on('COM', async user => {
   
     if (user.id === Bot.myId || !['SOW9cAv7B2', 'bbbbbbbbB.'].includes(user.trip))
@@ -412,6 +415,9 @@
         break;
       case 'BOT通常':
         Bot.stat('通常');
+        break;
+      case 'BOT開始時間':
+        Bot.stat(botStartTime.toLocaleString());
         break;
       case '魂停止':
         Bot.stat((pause = !pause) ? '大霊界BOT停止中' : '通常');

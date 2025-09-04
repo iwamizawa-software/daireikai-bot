@@ -395,9 +395,11 @@
       var dealer = (hand[0] + 12) % 13;
       var player = (hand[1] + 12) % 13;
       var result = dealer > player ? 'LOW' : dealer < player ? 'HIGH' : 'SAME';
+      Bot.stat(`[${cardStrings[0]}] [${cardStrings[1]}] ${result}`);
       if (['LOW', 'HIGH'][choice] === result)
         win += bet * 2;
-      Bot.stat(`[${cardStrings[0]}] [${cardStrings[1]}] ${result}`);
+      else
+        break;
     }
     if (win) {
       Bot.comment(`${userData.shortName} +${win} (MP${userData.count})`);

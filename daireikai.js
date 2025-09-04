@@ -82,7 +82,9 @@
     Bot.comment(`${userData.shortName} 実績解除:${achievementName}` + (options.addTamashii ? formatPoint(options.addTamashii) : '') + (options.addCount ? ` (MP${userData.count})` : ''));
   };
   var showAchievements = userData => Bot.comment(`${userData.shortName}の実績:` + Object.keys(userData.achievementMap).join(',') + ` (MP${userData.count})`);
+  showAchievements.cost = showAchievements.muteCost = 1;
   var showAchievementHolders = (userData, {name} = {}) => Bot.comment(`${name}達成者:` + userRank.filter(d => d.achievementMap?.hasOwnProperty(name)).map(d => d.shortName || d.id).join(',') + ` (MP${userData.count})`);
+  showAchievementHolders.cost = showAchievementHolders.muteCost = 1;
   
   var kuji = userData => {
     var r = Bot.kuji(...daireikaiKujiArguments).slice();
@@ -301,6 +303,110 @@
   poron.cost = 2;
   poron.muteCost = 1;
   
+  var whatifBonus = (userData, bet, hand) => {
+    if (hand.includes(-1))
+      return 0;
+    var handRank = hand.getHandRank();
+    var pays = ({
+      'ロイヤルフラッシュ': 200,
+      'ストレートフラッシュ': 20,
+      'フォーカード': 5,
+      'フルハウス': 2,
+      'フラッシュ': 1
+    }[handRank] || 0) * bet;
+    if (pays) {
+      Bot.comment(handRank + ' +' + pays);
+      unlockAchievement(userData, handRank);
+    }
+    return pays;
+  };
+  var getWhatifText = (succeeded, field, hand, result = '') => [succeeded, field.toCardStrings()[0] || '**', hand.toCardStrings().join(result ? '' : '　').replace(/Jo/g, '×')].join('｜') + result;
+  var whatif = async (userData, {bet}) => {
+    var maxBet = Math.min(userData.tamashii, 50);
+    if (!bet) {
+      Bot.stat('何BET?');
+      bc.postMessage([userData]);
+    }
+    bet = Math.min(maxBet, bet || +(await waitForStat(/^[1-9]\d*$/, userData.id, 10000, true)));
+    if (!bet) {
+      Bot.stat('時間切れ MP' + userData.count);
+      return;
+    }
+    userData.tamashii -= bet;
+    bc.postMessage([userData]);
+    var deck = Cards(0).shuffle();
+    var hand = deck.draw(5);
+    var field = Cards.from([]);
+    var selectableIndexes = [0, 1, 2, 3, 4];
+    var win = whatifBonus(userData, bet, hand);
+    var succeeded = 0;
+    do {
+      var text = getWhatifText(succeeded, field, hand);
+      Bot.stat(text);
+      var time = Date.now();
+      var resent = false;
+      do {
+        var input = (await waitForStat(/^[0-6]$/, userData.id, 60000 - Date.now() + time, true)) || '0';
+        if (input === '6') {
+          if (!resent)
+            Bot.comment(text);
+          resent = true;
+          continue;
+        }
+        var index = input === '0' ? selectableIndexes[Math.floor(Math.random() * selectableIndexes.length)] : input - 1;
+      } while (!selectableIndexes.includes(index));
+      field[0] = hand[index];
+      hand[index] = deck.length ? deck.shift() : -1;
+      selectableIndexes = hand.map((c, i) => c !== -1 && (Math.floor(field[0] / 13) === Math.floor(c / 13) || field[0] % 13 === c % 13) ? i : null).filter(i => i !== null);
+      win += whatifBonus(userData, bet, hand);
+      succeeded++;
+    } while (selectableIndexes.length);
+    win += [
+       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+       1,  1,  1,  2,  2,  2,  3,  3,  3,  4,
+       4,  5,  5,  6,  6,  7,  8,  9, 10, 11,
+      12, 13, 14, 15, 16, 17, 18, 19, 20, 22,
+      24, 26, 28, 30, 35, 40, 45, 50, 60, 70,
+      80, 90, 100
+    ][succeeded] * bet;
+    Bot.stat(getWhatifText(succeeded, field, hand, win ? ' win' : '(+0)'));
+    if (succeeded === 52)
+      unlockAchievement(userData, 'whatif制覇');
+    if (!win)
+      return;
+    for (var i = 0; i < 3; i++) {
+      Bot.comment(`得点${win}でHIGH&LOWに挑戦 10秒以内 状態で回答 0終 1全賭 2半賭 A最強2最弱 同数必敗`);
+      input = +(await waitForStat(/^[012]$/, userData.id, 10000, true));
+      if (!input)
+        break;
+      bet = input === 1 ? win : Math.floor(win / 2);
+      win -= bet;
+      var hand = Cards(0).shuffle().draw(2);
+      var cardStrings = hand.toCardStrings();
+      var time = Date.now();
+      Bot.stat(`[${cardStrings[0]}] [？]＝0低 1高 2発言`);
+      var choice = +(await waitForStat(/^[012]$/, userData.id, 30000, true));
+      if (choice === 2) {
+        var text = `[${cardStrings[0]}] [？]＝0低 1高`;
+        Bot.comment(text);
+        Bot.stat(text);
+        choice = +(await waitForStat(/^[01]$/, userData.id, 30000 - Date.now() + time, true));
+      }
+      var dealer = (hand[0] + 12) % 13;
+      var player = (hand[1] + 12) % 13;
+      var result = dealer > player ? 'LOW' : dealer < player ? 'HIGH' : 'SAME';
+      if (['LOW', 'HIGH'][choice] === result)
+        win += bet * 2;
+      Bot.stat(`[${cardStrings[0]}] [${cardStrings[1]}] ${result}`);
+    }
+    if (win) {
+      Bot.comment(`${userData.shortName} +${win} (MP${userData.count})`);
+      userData.tamashii += win;
+      onTamashiiChange();
+    }
+  };
+  whatif.cost = whatif.muteCost = 2;
+  
   var nonti = userData => {
     Bot.comment(`うむ ${userData.shortName}(+10) (MP${userData.count})`);
     userData.tamashii += 10;
@@ -373,10 +479,15 @@
     if (mute && userStatMap[user.id] && userStatMap[user.id].prev === userStatMap[user.id].current)
       return;
     
-    var cmt = Bot.normalize(mute ? user.stat : user.cmt);
+    var realCmt = mute ? user.stat : user.cmt;
+    var cmt = Bot.normalize(realCmt);
     var game, options = {mute};
     if (/^\s*(?:ぽーかー|poker)\s*([1-9]\d?)?\s*$/i.test(cmt)) {
       game = poker;
+      if (RegExp.$1)
+        options.bet = +RegExp.$1;
+    } else if (mute && location.hash !== '#/room/15' && /^\s*(?:whatif)\s*([1-9]\d?)?\s*$/i.test(cmt)) {
+      game = whatif;
       if (RegExp.$1)
         options.bet = +RegExp.$1;
     } else if (/^\s*ぽろんげーむ\s*$/i.test(cmt))
@@ -395,7 +506,7 @@
       game = ranking;
     else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:実績|じっせき)$/.test(cmt))
       game = showAchievements;
-    else if (/^(.+)の?(?:達成者|たっせいしゃ)$/.test(user.cmt)) {
+    else if (/^(.+)の?(?:達成者|たっせいしゃ)$/.test(realCmt)) {
       game = showAchievementHolders;
       options.name = RegExp.$1;
     } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:第|だい)?([1-9]\d*)(?:位|い)は?(?:だれ|誰)?\??$/.test(cmt)) {

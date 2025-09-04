@@ -94,13 +94,24 @@
       unlockAchievement(userData, 'ほろべソング', {addCount: 2});
     onTamashiiChange();
   };
-  var rank = userData => {
+  kuji.cost = kuji.muteCost = 1;
+  var rank = (userData, {mute}) => {
     var n = userRank.indexOf(userData) + 1;
+    if (mute) {
+      var text = ` ${n <= 0 ? '圏外' : n + '位'} ${userData.tamashii}`;
+      Bot.stat(userData.shortName.slice(0, 20 - text.length) + text);
+      return;
+    }
     Bot.comment(`${userData.name}(${userData.tamashii})のランクは${n <= 0 ? '圏外' : n + '位'}です (MP${userData.count})`);
   };
+  rank.cost = 1;
+  rank.muteCost = 0;
   var ranking = userData => Bot.comment('タマシイTOP3:' + userRank.slice(0, 3).map(d => `${d.shortName}(${d.tamashii})`).join(', ') + ` (MP${userData.count})`);
+  ranking.cost = ranking.muteCost = 1;
   var nanni = (userData, {n}) => Bot.comment(`第${n}位は${userRank[--n] ? `${userRank[n].name}(${userRank[n].tamashii})です` : 'いません'} (MP${userData.count})`);
+  nanni.cost = nanni.muteCost = 1;
   var season = (userData, {n}) => Bot.comment(`シーズン${n}タマシイTOP5:` + seasonData[n].slice(0, 5).map(d => `${d.shortName}(${d.tamashii})`).join(', ') + ` (MP${userData.count})`);
+  season.cost = season.muteCost = 1;
   
   var kyuusai = async userData => {
     Bot.comment(`みんと「${userData.shortName}の魂(${userData.tamashii})を僕のｶｳﾝｾﾘﾝｸﾞでｱｾﾝｼｮﾝする？」10秒以内 数字回答 1.する 2.しない`);
@@ -120,24 +131,43 @@
     onTamashiiChange();
   };
   
-  var poker = async (userData, {bet} = {}) => {
-    userData.count--;
+  var poker = async (userData, {bet, mute}) => {
+    var waitForInput = mute ? waitForStat : listenTo;
     var maxBet = Math.min(userData.tamashii, 50);
     if (!bet) {
-      Bot.comment(`BETする${userData.shortName}の魂を1～${maxBet}の間で10秒以内に回答`);
+      if (mute)
+        Bot.stat('何BET?');
+      else
+        Bot.comment(`BETする${userData.shortName}の魂を1～${maxBet}の間で10秒以内に回答`);
       bc.postMessage([userData]);
     }
-    bet = Math.min(maxBet, bet || +(await listenTo(/^[1-9]\d*$/, userData.id, 10000, true)));
+    bet = Math.min(maxBet, bet || +(await waitForInput(/^[1-9]\d*$/, userData.id, 10000, true)));
     if (!bet) {
-      Bot.comment(`時間切れ ${userData.shortName}は決断できなかった (MP${userData.count})`);
+      if (mute)
+        Bot.stat('時間切れ MP' + userData.count);
+      else
+        Bot.comment(`時間切れ ${userData.shortName}は決断できなかった (MP${userData.count})`);
       return;
     }
     userData.tamashii -= bet;
     var deck = Cards(1).shuffle();
     var hand = deck.draw(5);
-    Bot.comment(hand.toCardStrings().map(s => '[' + s + ']').join(' ') + ' 30秒以内 残す札を数字で指定 0で全捨て');
+    if (mute)
+      Bot.stat(hand.toCardStrings().join(' '));
+    else
+      Bot.comment(hand.toCardStrings().map(s => '[' + s + ']').join(' ') + ' 30秒以内 残す札を数字で指定 0で全捨て');
     bc.postMessage([userData]);
-    var input = (await listenTo(/^[0-5]+$/, userData.id, 30000, true)) || '';
+    var time = Date.now();
+    var input = null;
+    if (mute) {
+      input = (await waitForInput(/^[0-6]+$/, userData.id, 30000, true)) || '';
+      if (input.includes('6')) {
+        Bot.comment(hand.toCardStrings().map(s => '[' + s + ']').join(' '));
+        input = null;
+      }
+    }
+    if (input === null)
+      input = (await waitForInput(/^[0-5]+$/, userData.id, 30000 - Date.now() + time, true)) || '';
     var hold = input.includes('0') ? '' : input.replace(/[12345]/g, n => n - 1);
     var remove = '01234'.split('').filter(n => !hold.includes(n));
     hand.removeAt(remove).append(deck.draw(remove.length));
@@ -156,12 +186,30 @@
       'はずれ': 0
     }[handRank];
     var add = rate * bet;
-    Bot.comment(hand.toCardStrings().map(s => '[' + s + ']').join(' ') + ` ${handRank}(+${add}) (MP${userData.count})`);
+    if (mute) {
+      var shortHandRank = {
+        'ファイブカード': '5C',
+        'ロイヤルフラッシュ': 'RF',
+        'ストレートフラッシュ': 'SF',
+        'フォーカード': '4C',
+        'フルハウス': 'FH',
+        'フラッシュ': 'Fl',
+        'ストレート': 'St',
+        'スリーカード': '3C',
+        'ツーペア': '2P',
+        'ワンペア': '1P',
+        'はずれ': 'No'
+      }[handRank];
+      Bot.stat(hand.toCardStrings().join('') + ' ' + shortHandRank + '+' + add);
+    } else
+      Bot.comment(hand.toCardStrings().map(s => '[' + s + ']').join(' ') + ` ${handRank}(+${add}) (MP${userData.count})`);
     userData.tamashii += add;
     if (rate > 3)
       unlockAchievement(userData, handRank);
     onTamashiiChange();
   };
+  poker.cost = 2;
+  poker.muteCost = 1;
   
   var seminar = userData => {
     var text = seminarContents[Math.floor(Math.random() * seminarContents.length)];
@@ -184,7 +232,7 @@
   
   var ebumi = async userData => {
     var fumie = fumieContents[Math.floor(Math.random() * fumieContents.length)];
-    Bot.comment(`江戸幕府は絵踏みを実施した 30秒以内に ${fumie} と発言しなければ魂が半分となる`);
+    Bot.comment(`江戸幕府は絵踏みを実施した 30秒以内に ${fumie} と"発言"しなければ魂が半分となる`);
     bc.postMessage([userData]);
     if (await listenTo(fumie, userData.id, 30000)) {
       Bot.comment(`${userData.shortName}は保身に走った(+0) (MP${userData.count})`);
@@ -197,10 +245,13 @@
     }
   };
 
-  var poron = async userData => {
-    userData.count--;
-    Bot.comment(`全員参加可 状態：を使い1～100のランダムな数を1番先に当てる 40秒以内 (MP${userData.count})`);
-    Bot.stat('？');
+  var poron = async (userData, {mute}) => {
+    if (mute) {
+      Bot.stat('ぽろんゲーム開始');
+    } else {
+      Bot.comment(`全員参加可 状態：を使い1～100のランダムな数を1番先に当てる 40秒以内 (MP${userData.count})`);
+      Bot.stat('？');
+    }
     var answer = Math.floor(Math.random() * 100) + 1;
     console.log('poron game:' + answer);
     var rank = [1000, 100, 50, 25, 12];
@@ -224,11 +275,17 @@
         Bot.stat(guess + 'より' + (guess > answer ? '小さい' : '大きい'));
       guessCount++;
     }
-    Bot.stat('通常');
+    if (!mute)
+      Bot.stat('通常');
     if (winner) {
       var winnerData = getUserData(winner);
       var add = (rank[guessCount] || 10) * players.size;
-      Bot.comment(`${winnerData.shortName}正解 ${answer}でした(+${add})`);
+      if (mute) {
+        var text = ` 答${answer} +${add}`;
+        Bot.stat(winnerData.shortName.slice(0, 20 - text.length) + text);
+      } else {
+        Bot.comment(`${winnerData.shortName}正解 ${answer}でした(+${add})`);
+      }
       winnerData.tamashii += add;
       if (guessCount === 0)
         unlockAchievement(winnerData, '名誉ぽろん人');
@@ -238,9 +295,11 @@
       }
       onTamashiiChange();
     } else {
-      Bot.comment('答えは' + answer + 'でした');
+      Bot[mute ? 'stat' : 'comment']('答えは' + answer + 'でした');
     }
   };
+  poron.cost = 2;
+  poron.muteCost = 1;
   
   var nonti = userData => {
     Bot.comment(`うむ ${userData.shortName}(+10) (MP${userData.count})`);
@@ -250,6 +309,7 @@
       unlockAchievement(userData, '作者に感謝', {addCount: 2});
     onTamashiiChange();
   };
+  nonti.cost = nonti.muteCost = 1;
   
   var ntaso = userData => {
     var add = -10;
@@ -268,34 +328,48 @@
     }
     onTamashiiChange();
   };
+  ntaso.cost = ntaso.muteCost = 1;
   
   var kinku = userData => {
-    Bot.stat(`${userData.shortName} -1000 MP0`);
+    Bot.stat(`${userData.shortName.slice(0, 10)} -1000 MP0`);
     userData.tamashii -= 1000;
     userData.count = 0;
     unlockAchievement(userData, 'れたｓ');
     onTamashiiChange();
   };
+  kinku.cost = kinku.muteCost = 1;
 
-  var pause = true;
-  on('COM', async user => {
-  
-    if (pause || user.id === Bot.myId)
+  var pause = !userRank.length;
+  var userStatMap = {};
+  on('*', async (type, attr) => {
+
+    if (pause || attr.id === Bot.myId || !['COM', 'SET'].includes(type) || (!attr.cmt && !attr.stat))
       return;
-  
+    
+    var user = Bot.users[attr.id];
     var rejectResponse = reason => Bot.stat('×id:' + user.id.slice(0, 3) + ' ' + reason);
-  
+    
+    if (!user) {
+      user = {id: attr.id};
+      rejectResponse('no user');
+      return;
+    }
     if (denyList.has(user.shiro) || denyList.has(user.kuro)) {
       rejectResponse('魂BOT出禁');
       return;
     }
     
-    var cmt = Bot.normalize(user.cmt);
-    var game, options;
+    var mute = type === 'SET';
+    if (mute && userStatMap[user.id] === user.stat)
+      return;
+    userStatMap[user.id] = user.stat;
+    
+    var cmt = Bot.normalize(mute ? user.stat : user.cmt);
+    var game, options = {mute};
     if (/^\s*(?:ぽーかー|poker)\s*([1-9]\d?)?\s*$/i.test(cmt)) {
       game = poker;
       if (RegExp.$1)
-        options = {bet: +RegExp.$1};
+        options.bet = +RegExp.$1;
     } else if (/^\s*ぽろんげーむ\s*$/i.test(cmt))
       game = poron;
     else if (/^(?:のんち|むじんくん|nonn?ti)(?:ありがとう|すごい|えらい|偉い|(?:大|だい)?(?:好|す|しゅ|ちゅ)き)$/i.test(cmt))
@@ -314,48 +388,37 @@
       game = showAchievements;
     else if (/^(.+)の?(?:達成者|たっせいしゃ)$/.test(user.cmt)) {
       game = showAchievementHolders;
-      options = {name: RegExp.$1};
+      options.name = RegExp.$1;
     } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:第|だい)?([1-9]\d*)(?:位|い)は?(?:だれ|誰)?\??$/.test(cmt)) {
       game = nanni;
-      var options = {n: RegExp.$1};
+      options.n = RegExp.$1;
     } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?しーずん(\d+)$/.test(cmt)) {
-      var n = RegExp.$1;
-      if (!seasonData[n]) {
-        rejectResponse(`シーズン${n}無し`);
+      options.n = RegExp.$1;
+      if (!seasonData[options.n]) {
+        rejectResponse(`シーズン${options.n}無し`);
         return;
       }
       game = season;
-      options = {n};
     } else {
       logNonCommand(user);
       return;
     }
 
     var userData = getUserData(user);
-    if (userData.count <= 0) {
-      rejectResponse('MP0');
-      logTamashii(userData, 'mp0');
+    var cost = game[mute ? 'muteCost' : 'cost'];
+    if (userData.count < cost) {
+      rejectResponse(userData.count ? `MP${cost}未満` : 'MP0');
+      logTamashii(userData, cmt + 'reject' + cost);
       return;
     }
-
-    if (game === poker) {
-      if (userData.tamashii <= 5) {
-        rejectResponse('魂5以下');
-        logTamashii(userData, 'pokerTamashii5');
-        return;
-      } else if (userData.count < 2) {
-        rejectResponse('MP2未満');
-        logTamashii(userData, 'pokerCount2');
-        return;
-      }
-    } else if (game === poron && userData.count < 2) {
-      rejectResponse('MP2未満');
-      logTamashii(userData, 'poronCount2');
+    if (game === poker && userData.tamashii <= 5) {
+      rejectResponse('魂5以下');
+      logTamashii(userData, 'pokerTamashii5');
       return;
     }
-
-    Bot.stat('通常');
-    userData.count--;
+    if (!mute)
+      Bot.stat('通常');
+    userData.count -= cost;
 
     if (game === poker && userRank[0] === userData && Math.random() < 0.05) {
       game = seminar;
@@ -482,6 +545,7 @@
     
   });
   
-  setTimeout(() => Bot.stat('大霊界BOT停止中'), 5000);
+  if (pause)
+    setTimeout(() => Bot.stat('大霊界BOT停止中'), 5000);
 
 })();

@@ -1,7 +1,7 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 11;
+  var VERSION = 12;
   var MAX_LOG = 1000;
   
   var tamashiiLogs = [];
@@ -339,8 +339,18 @@
   };
   kinku.cost = kinku.muteCost = 1;
 
-  var pause = !userRank.length;
   var userStatMap = {};
+  on('SET', u => {
+    if (u.stat === undefined)
+      return;
+    if (!userStatMap[u.id])
+      userStatMap[u.id] = {};
+    var userStat = userStatMap[u.id];
+    userStat.prev = userStat.current;
+    userStat.current = u.stat;
+  });
+  
+  var pause = !userRank.length;
   on('*', async (type, attr) => {
 
     if (pause || attr.id === Bot.myId || !['COM', 'SET'].includes(type) || (!attr.cmt && !attr.stat))
@@ -360,9 +370,8 @@
     }
     
     var mute = type === 'SET';
-    if (mute && userStatMap[user.id] === user.stat)
+    if (mute && userStatMap[user.id] && userStatMap[user.id].prev === userStatMap[user.id].current)
       return;
-    userStatMap[user.id] = user.stat;
     
     var cmt = Bot.normalize(mute ? user.stat : user.cmt);
     var game, options = {mute};

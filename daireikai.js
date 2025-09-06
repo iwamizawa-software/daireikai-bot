@@ -42,6 +42,8 @@
       userData.achievementMap = {};
     if (!userData.nCount)
       userData.nCount = 0;
+    if (!userData.urami)
+      userData.urami = 0;
     return userData;
   };
   
@@ -70,6 +72,7 @@
   };
   
   var formatPoint = n => `(${(n >= 0 ? '+' : '') + n})`;
+  var formatStatText = (name, text) => name.slice(0, 20 - text.length) + text;
   
   var unlockAchievement = (userData, achievementName, options = {}) => {
     if (userData.achievementMap[achievementName])
@@ -99,12 +102,10 @@
   kuji.cost = kuji.muteCost = 1;
   var rank = (userData, {mute}) => {
     var n = userRank.indexOf(userData) + 1;
-    if (mute) {
-      var text = ` ${n <= 0 ? '圏外' : n + '位'} ${userData.tamashii}`;
-      Bot.stat(userData.shortName.slice(0, 20 - text.length) + text);
-      return;
-    }
-    Bot.comment(`${userData.name}(${userData.tamashii})のランクは${n <= 0 ? '圏外' : n + '位'}です (MP${userData.count})`);
+    if (mute)
+      Bot.stat(formatStatText(userData.shortName, ` ${n <= 0 ? '圏外' : n + '位'} ${userData.tamashii}`));
+    else
+      Bot.comment(`${userData.name}(${userData.tamashii})のランクは${n <= 0 ? '圏外' : n + '位'}です (MP${userData.count})`);
   };
   rank.cost = 1;
   rank.muteCost = 0;
@@ -282,12 +283,10 @@
     if (winner) {
       var winnerData = getUserData(winner);
       var add = (rank[guessCount] || 10) * players.size;
-      if (mute) {
-        var text = ` 答${answer} +${add}`;
-        Bot.stat(winnerData.shortName.slice(0, 20 - text.length) + text);
-      } else {
+      if (mute)
+        Bot.stat(formatStatText(winnerData.shortName, ` 答${answer} +${add}`));
+      else
         Bot.comment(`${winnerData.shortName}正解 ${answer}でした(+${add})`);
-      }
       winnerData.tamashii += add;
       if (guessCount === 0)
         unlockAchievement(winnerData, '名誉ぽろん人');
@@ -425,18 +424,30 @@
       add = 3180;
     Bot.comment(`どういたしまして ${userData.shortName}${formatPoint(add)} (MP${userData.count})`);
     userData.tamashii += add;
-    if (add > 0)
+    var nData = getUserData('◆Ntaso.Mads');
+    if (add > 0) {
       unlockAchievement(userData, 'ギャンブラー');
-    else {
-      var nData = getUserData('◆Ntaso.Mads');
+      var urami = Math.min(add, userData.urami);
+      userData.urami -= urami;
+      nData.tamashii -= urami;
+    } else {
+      userData.urami -= add;
       nData.tamashii -= add;
-      if (userData === nData)
-        return;
-      bc.postMessage([nData]);
     }
+    if (userData !== nData)
+      bc.postMessage([nData]);
     onTamashiiChange();
   };
   ntaso.cost = ntaso.muteCost = 1;
+  
+  var urami = (userData, {mute}) => {
+    if (mute)
+      Bot.stat(formatStatText(userData.shortName, ` 恨${userData.urami}`));
+    else
+      Bot.comment(`${userData.name}のうらみは${userData.urami}です (MP${userData.count})`);
+  };
+  urami.cost = 1;
+  urami.muteCost = 0;
   
   var kinku = userData => {
     Bot.stat(`${userData.shortName.slice(0, 10)} -1000 MP0`);
@@ -492,23 +503,23 @@
       game = whatif;
       if (RegExp.$1)
         options.bet = +RegExp.$1;
-    } else if (/^\s*ぽろんげーむ\s*$/i.test(cmt))
+    } else if (/^\s*ぽろんげーむ\s*$/i.test(cmt)) {
       game = poron;
-    else if (/^(?:のんち|むじんくん|nonn?ti)(?:ありがとう|すごい|えらい|偉い|(?:大|だい)?(?:好|す|しゅ|ちゅ)き)$/i.test(cmt))
+    } else if (/^(?:のんち|むじんくん|nonn?ti)(?:ありがとう|すごい|えらい|偉い|(?:大|だい)?(?:好|す|しゅ|ちゅ)き)$/i.test(cmt)) {
       game = nonti;
-    else if (/^(?:のんち|むじんくん|nonn?ti)(?:[\u3057\u6B7B\u6C0F]ね|[\u3058\u81EA](?:\u5BB3|\u6BBA|\u304C\u3044|\u3055\u3064)しろ)や?$/i.test(cmt))
+    } else if (/^(?:のんち|むじんくん|nonn?ti)(?:[\u3057\u6B7B\u6C0F]ね|[\u3058\u81EA](?:\u5BB3|\u6BBA|\u304C\u3044|\u3055\u3064)しろ)や?$/i.test(cmt)) {
       game = kinku;
-    else if (/^(?:n|えぬ)たそ(?:ありがとう|すごい|えらい|偉い|(?:大|だい)?(?:好|す|しゅ|ちゅ)き)$/i.test(cmt))
+    } else if (/^(?:n|えぬ)たそ(?:ありがとう|すごい|えらい|偉い|(?:大|だい)?(?:好|す|しゅ|ちゅ)き)$/i.test(cmt)) {
       game = ntaso;
-    else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:籤|くじ)$/.test(cmt))
+    } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:籤|くじ)$/.test(cmt)) {
       game = kuji;
-    else if (/^(?:大霊界|だいれいかい|魂|たましい)の?らんく$/.test(cmt))
+    } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?らんく$/.test(cmt)) {
       game = rank;
-    else if (/^(?:大霊界|だいれいかい|魂|たましい)の?らんきんぐ$/.test(cmt))
+    } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?らんきんぐ$/.test(cmt)) {
       game = ranking;
-    else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:実績|じっせき)$/.test(cmt))
+    } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:実績|じっせき)$/.test(cmt)) {
       game = showAchievements;
-    else if (/^(.+)の?(?:達成者|たっせいしゃ)$/.test(realCmt)) {
+    } else if (/^(.+)の?(?:達成者|たっせいしゃ)$/.test(realCmt)) {
       game = showAchievementHolders;
       options.name = RegExp.$1;
     } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:第|だい)?([1-9]\d*)(?:位|い)は?(?:だれ|誰)?\??$/.test(cmt)) {
@@ -521,6 +532,8 @@
         return;
       }
       game = season;
+    } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:恨|うら)み$/.test(cmt)) {
+      game = urami;
     } else {
       logNonCommand(user);
       return;

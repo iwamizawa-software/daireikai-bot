@@ -163,14 +163,14 @@
     var time = Date.now();
     var input = null;
     if (mute) {
-      input = (await waitForInput(/^[0-6]+$/, userData.id, 30000, true)) || '';
+      input = (await waitForInput(/^[0-6]+$/, userData.id, 30000, true)) || '12345';
       if (input.includes('6')) {
         Bot.comment(hand.toCardStrings().map(s => '[' + s + ']').join(' '));
         input = null;
       }
     }
     if (input === null)
-      input = (await waitForInput(/^[0-5]+$/, userData.id, 30000 - Date.now() + time, true)) || '';
+      input = (await waitForInput(/^[0-5]+$/, userData.id, 30000 - Date.now() + time, true)) || '12345';
     var hold = input.includes('0') ? '' : input.replace(/[12345]/g, n => n - 1);
     var remove = '01234'.split('').filter(n => !hold.includes(n));
     hand.removeAt(remove).append(deck.draw(remove.length));

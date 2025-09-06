@@ -533,9 +533,9 @@
       logTamashii(userData, cmt + 'reject' + cost);
       return;
     }
-    if (game === poker && userData.tamashii <= 5) {
-      rejectResponse('魂5以下');
-      logTamashii(userData, 'pokerTamashii5');
+    if ((game === whatif || game === poker) && userData.tamashii <= 0) {
+      rejectResponse('魂0以下');
+      logTamashii(userData, cmt + 'tamashii0');
       return;
     }
     if (!mute)

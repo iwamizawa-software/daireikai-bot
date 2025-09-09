@@ -2,7 +2,7 @@
 
   var LIMIT = 60 * 60 * 1000;
   var VERSION = 12;
-  var MAX_LOG = 1000;
+  var MAX_LOG = 500;
   
   var tamashiiLogs = [];
   var logTamashii = (userData, note) => {
@@ -21,6 +21,12 @@
       return;
     nonCommandLogs.push({timestamp: (new Date()).toLocaleString(), id, fullName, cmt});
     nonCommandLogs.splice(0, nonCommandLogs.length - MAX_LOG);
+  };
+
+  var statLogs = [];
+  var logStat = ({id, fullName, stat} = {}) => {
+    statLogs.push({timestamp: (new Date()).toLocaleString(), id, fullName, stat});
+    statLogs.splice(0, statLogs.length - MAX_LOG);
   };
   
   var seasonData = await Bot.loadAsync('daireikaiSeason') || [];
@@ -460,13 +466,14 @@
 
   var userStatMap = {};
   on('SET', u => {
-    if (u.stat === undefined)
+    if (u.stat === undefined || u.id === Bot.myId)
       return;
     if (!userStatMap[u.id])
       userStatMap[u.id] = {};
     var userStat = userStatMap[u.id];
     userStat.prev = userStat.current;
     userStat.current = u.stat;
+    logStat(u);
   });
   
   var pause = !userRank.length;
@@ -669,8 +676,12 @@
       case '発言ログ保存':
         upload(nonCommandLogs, 'non-command-log.json');
         break;
-      case '全保存':
-        Bot.stat(await upload(userDataMap, 'tamashii.json') && await upload(tamashiiLogs, 'tamashii-log.json') && await upload(nonCommandLogs, 'non-command-log.json') ? '全保存成功' : '全保存失敗');
+      case '状態ログ保存':
+        upload(statLogs, 'stat-log.json');
+        break;
+      case '魂調査':
+        upload(statLogs, 'stat-log.json');
+        upload(Object.entries(Bot.listeners).map(([type, listeners]) => [type, listeners.map(listener => Object.assign({listener: (listener + '').slice(0, 100)}, listener))]), 'listeners.json');
         break;
       case '🔒URL登録':
         Bot.saveAsync('daireikaiWebhook', command[1]);

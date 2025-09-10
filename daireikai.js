@@ -380,8 +380,8 @@
     if (!win)
       return;
     for (var i = 0; i < 3; i++) {
-      Bot.comment(`得点${win}でHIGH&LOWに挑戦 10秒以内 状態で回答 0終 1全賭 2半賭 A最強2最弱 同数必敗`);
-      input = +(await waitForStat(/^[012]$/, userData.id, 10000, true));
+      Bot.comment(`得点${win}でHIGH&LOWに挑戦 20秒以内 状態で回答 0終 1全賭 2半賭 A最強2最弱 同数必敗`);
+      input = +(await waitForStat(/^[012]$/, userData.id, 20000, true));
       if (!input)
         break;
       bet = input === 1 ? win : Math.floor(win / 2);

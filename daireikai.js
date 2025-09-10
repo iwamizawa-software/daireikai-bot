@@ -476,6 +476,7 @@
     logStat(u);
   });
   
+  var tripsByIhash = {};
   var pause = !userRank.length;
   on('*', async (type, attr) => {
 
@@ -493,6 +494,17 @@
     if (denyList.has(user.shiro) || denyList.has(user.kuro)) {
       rejectResponse('魂BOT出禁');
       return;
+    }
+    
+    if (user.trip) {
+      if (!tripsByIhash[user.ihash])
+        tripsByIhash[user.ihash] = new Set();
+      var trips = tripsByIhash[user.ihash];
+      trips.add(user.trip);
+      if (trips.size > 2) {
+        rejectResponse('1人2トリップまで');
+        return;
+      }
     }
     
     var mute = type === 'SET';

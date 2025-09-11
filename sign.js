@@ -17,4 +17,4 @@ const encrypt = (buffer, password) => {
 };
 
 if (require.main === module)
-  fs.writeFileSync('daireikai.js.txt', encrypt(fs.readFileSync('daireikai.js'), /* process.env.DRKPASS */'test'), 'utf8');
+  fs.writeFileSync('daireikai.js.txt', encrypt(fs.readFileSync('daireikai.js'), process.env.DRKPASS), 'utf8');

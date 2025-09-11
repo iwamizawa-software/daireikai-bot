@@ -1,0 +1,9 @@
+#!/bin/sh
+
+changed_files=$(git diff --cached --name-only)
+
+echo "$changed_files" | grep -q "^daireikai.js$"
+if [ $? -eq 0 ]; then
+  node sign.js
+  git add daireikai.js.txt
+fi

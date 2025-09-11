@@ -16,5 +16,7 @@ const encrypt = (buffer, password) => {
   return arrayBufferToBase64(salt) + arrayBufferToBase64(iv) + arrayBufferToBase64(encryptedWithTag);
 };
 
-if (require.main === module)
-  fs.writeFileSync('daireikai.js.txt', encrypt(Buffer.from(fs.readFileSync('daireikai.js', 'utf8').replace(/\r\n/g, '\n'), 'utf8'), process.env.DRKPASS), 'utf8');
+if (require.main === module) {
+  const code = fs.readFileSync('daireikai.js', 'utf8').replace(/\r\n/g, '\n').replace(/\/\/ signature:[a-zA-Z0-9\+\/=]+\n$/, '');
+  fs.writeFileSync('daireikai.js', code + '// signature:' + encrypt(Buffer.from(code, 'utf8'), process.env.DRKPASS) + '\n', 'utf8');
+}

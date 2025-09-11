@@ -707,3 +707,4 @@
     setTimeout(() => Bot.stat('大霊界BOT停止中'), 5000);
 
 })();
+// signature:DG02tDcxIGDOJ5dnGKp6SlfP5iluQCtbisH3we0p9MGYoxOLYZx/waMYotbIyUYSC/XRtn8w7Oyscr3eZmElRO4fA7IQ+h7XbgG+zzYv

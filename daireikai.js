@@ -546,7 +546,7 @@
       game = ntaso;
     } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:籤|くじ)$/.test(cmt)) {
       game = kuji;
-    } else if (/^(?:(?:大霊界|だいれいかい|魂|たましい)の?らんく|trank)$/i.test(cmt)) {
+    } else if (/^(?:(?:大霊界|だいれいかい|魂|たましい)の?らんく|soulrank)$/i.test(cmt)) {
       game = rank;
     } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?らんきんぐ$/.test(cmt)) {
       game = ranking;
@@ -736,4 +736,4 @@
   });
 
 })();
-// signature:lbDo+TkWr4DXA4QGYupr5nTbkCHZ3rdRPKlpaaEvvSZilKdmBtEZznzSztmmqfakYeXNU6D/KSnLKxaOFITCMkPDpKuxUzuwu+sn4nBO
+// signature:BdLKuidFMCPM76xxQmvlSDKamFoMJa8yUgw4gsNfW9guCt9mdyw4XsAqsHIl79X7+AoO274XSMItE1uLGTxZOExwrqEqBVKifq+TeH7s

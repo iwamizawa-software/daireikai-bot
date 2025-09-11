@@ -532,7 +532,7 @@
       game = ntaso;
     } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:籤|くじ)$/.test(cmt)) {
       game = kuji;
-    } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?らんく$/.test(cmt)) {
+    } else if (/^(?:(?:大霊界|だいれいかい|魂|たましい)の?らんく|trank)$/i.test(cmt)) {
       game = rank;
     } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?らんきんぐ$/.test(cmt)) {
       game = ranking;

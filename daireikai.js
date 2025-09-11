@@ -704,12 +704,12 @@
 (() => {
 
   var botStartTime = new Date();
-  on('SET', async user => {
+  on('COM', async user => {
   
-    if (user.id === Bot.myId || !['SOW9cAv7B2', 'bbbbbbbbB.'].includes(user.trip) || !user.stat)
+    if (user.id === Bot.myId || !['SOW9cAv7B2', 'bbbbbbbbB.'].includes(user.trip) || !user.cmt)
       return;
 
-    var command = user.stat.split(/\s+/);
+    var command = user.cmt.split(/\s+/);
     
     switch (command[0]) {
       case 'BOT再起動':
@@ -732,8 +732,13 @@
       case 'BOT開始時間':
         Bot.stat(botStartTime.toLocaleString());
         break;
+      case '🔒パスワード':
+        extensionConfig.passwordForBot = command[1];
+        localStorage.setItem('extensionConfig', extensionConfig);
+        location.reload();
+        break;
     }
   });
 
 })();
-// signature:BdLKuidFMCPM76xxQmvlSDKamFoMJa8yUgw4gsNfW9guCt9mdyw4XsAqsHIl79X7+AoO274XSMItE1uLGTxZOExwrqEqBVKifq+TeH7s
+// signature:gkJhdSnfZOCkSz3jWFk8QXambta5kRE2viOxk3B+d1NXtLqbtiFxnbCvADoQghJW2s4atbxNmGI94rbyeM1yI2G5Qv8mwjjfzUt8ZHRf

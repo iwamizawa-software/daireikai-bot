@@ -131,8 +131,9 @@
   rank.muteCost = 0;
   var ranking = userData => Bot.comment('タマシイTOP3:' + userRank.slice(0, 3).map(d => `${d.shortName}(${d.tamashii})`).join(', ') + ` (MP${userData.count})`);
   ranking.cost = ranking.muteCost = 1;
-  var nanni = (userData, {n}) => Bot.comment(`第${n}位は${userRank[--n] ? `${userRank[n].name}(${userRank[n].tamashii})です` : 'いません'} (MP${userData.count})`);
-  nanni.cost = nanni.muteCost = 1;
+  var nanni = (userData, {n, mute}) => userRank[n - 1] ? rank(userRank[n - 1], {mute}) : Bot.stat(n + '位は居ない');
+  nanni.cost = 1;
+  nanni.muteCost = 0;
   var season = (userData, {n}) => Bot.comment(`シーズン${n}タマシイTOP5:` + seasonData[n].slice(0, 5).map(d => `${d.shortName}(${d.tamashii})`).join(', ') + ` (MP${userData.count})`);
   season.cost = season.muteCost = 1;
   
@@ -555,9 +556,9 @@
     } else if (/^(.+)の?(?:達成者|たっせいしゃ)$/.test(realCmt)) {
       game = showAchievementHolders;
       options.name = RegExp.$1;
-    } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:第|だい)?([1-9]\d*)(?:位|い)は?(?:だれ|誰)?\??$/.test(cmt)) {
+    } else if (mute && /^(?:大霊界|だいれいかい|魂|たましい)の?(?:第|だい)?([1-9]\d*)(?:位|い)は?(?:だれ|誰)?\??$/.test(cmt)) {
       game = nanni;
-      options.n = RegExp.$1;
+      options.n = +RegExp.$1;
     } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?しーずん(\d+)$/.test(cmt)) {
       options.n = RegExp.$1;
       if (!seasonData[options.n]) {
@@ -736,4 +737,4 @@
   });
 
 })();
-// signature:27EQarXpPVbNhxXsC6JyRqwnsjvj7Co0q8AfPE4L/fHpi9MQZk2FDN1CUSS5WPoweUeyIFHjbMDbFdOsz7SRdqkdtDgJntBja+u1iOaK
+// signature:j+Ze/7Kv9yn7pln7f5GUpV/O9ivZLofULVvaSLXyCOFWkerTksgixQsS/G40qKPWqbBMvuo9Tz1shp57am8Cog556yfhzRxY9VGonKbw

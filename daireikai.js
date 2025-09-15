@@ -92,7 +92,7 @@
   };
   
   var formatPoint = n => `(${(n >= 0 ? '+' : '') + n})`;
-  var formatStatText = (name, text) => name.slice(0, 20 - text.length) + text;
+  var formatStatText = (name, text) => (name || '名無').slice(0, 20 - text.length) + text;
   
   var unlockAchievement = (userData, achievementName, options = {}) => {
     if (userData.achievementMap[achievementName])
@@ -737,4 +737,4 @@
   });
 
 })();
-// signature:j+Ze/7Kv9yn7pln7f5GUpV/O9ivZLofULVvaSLXyCOFWkerTksgixQsS/G40qKPWqbBMvuo9Tz1shp57am8Cog556yfhzRxY9VGonKbw
+// signature:Iyqgc8aQl0wlJOEIHDPFNPHv9Bmo9VNuJdpDsZp9wjyFXXonG0UHlOG6UZiODOdyQzKZUCEtYHjrjy1PnwHHBDIm7iTvV2GIxuicjKiE

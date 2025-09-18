@@ -533,7 +533,7 @@
       game = poker;
       if (RegExp.$1)
         options.bet = +RegExp.$1;
-    } else if (mute && location.hash !== '#/room/15' && /^\s*(?:whatif)\s*([1-9]\d?)?\s*$/i.test(cmt)) {
+    } else if (mute && /^\s*(?:whatif)\s*([1-9]\d?)?\s*$/i.test(cmt)) {
       game = whatif;
       if (RegExp.$1)
         options.bet = +RegExp.$1;
@@ -583,6 +583,11 @@
     if ((game === whatif || game === poker) && userData.tamashii <= 0) {
       rejectResponse('魂0以下');
       logTamashii(userData, cmt + 'tamashii0');
+      return;
+    }
+    if (game === whatif && (new Date()).getMinutes() < 30) {
+      rejectResponse('可能時間' + (new Date()).getHours() + ':30～59');
+      logTamashii(userData, cmt + 'whatiftime');
       return;
     }
     if (!mute)
@@ -737,4 +742,4 @@
   });
 
 })();
-// signature:Iyqgc8aQl0wlJOEIHDPFNPHv9Bmo9VNuJdpDsZp9wjyFXXonG0UHlOG6UZiODOdyQzKZUCEtYHjrjy1PnwHHBDIm7iTvV2GIxuicjKiE
+// signature:2VBTxr+rUFauWRjuoQXaLD6Vd9a1b4gjy9BXW6pRY3OWwPnQOsZYXKZOdDfplbp9230W3MsnBHB6mQ7AM85iexKko8ahoSENCxSdr3Qj

@@ -389,13 +389,13 @@
       24, 26, 28, 30, 35, 40, 45, 50, 60, 70,
       80, 90, 100
     ][succeeded] * bet;
-    Bot.stat(getWhatifText(succeeded, field, hand, win ? ' win' : '(+0)'));
+    Bot.stat(getWhatifText(succeeded, field, hand, win ? '勝ち' : '終了'));
     if (succeeded === 52)
       unlockAchievement(userData, 'whatif制覇');
     if (!win)
       return;
     for (var i = 0; i < 3; i++) {
-      Bot.comment(`得点${win}でHIGH&LOWに挑戦 20秒以内 状態で回答 0終 1全賭 2半賭 A最強2最弱 同数必敗`);
+      Bot.comment(`得点${win}でHIGH&LOWに挑戦 20秒以内 状態で回答 0終 1全賭 2半賭`);
       input = +(await waitForStat(/^[012]$/, userData.id, 20000, true));
       if (!input)
         break;
@@ -742,4 +742,4 @@
   });
 
 })();
-// signature:2VBTxr+rUFauWRjuoQXaLD6Vd9a1b4gjy9BXW6pRY3OWwPnQOsZYXKZOdDfplbp9230W3MsnBHB6mQ7AM85iexKko8ahoSENCxSdr3Qj
+// signature:D50sXpAx/kkfffkv/mUdU3RBZKC2NHWYM1guTRBwiLsoth310DvZ7gO+sbEDG/UU+Ybyd3aDmqLVubSLR5NtlBX7EaIbI+6rwxkoYbaI

@@ -511,17 +511,6 @@
       return;
     }
     
-    if (user.trip) {
-      if (!tripsByIhash[user.ihash])
-        tripsByIhash[user.ihash] = new Set();
-      var trips = tripsByIhash[user.ihash];
-      trips.add(user.trip);
-      if (trips.size > 2) {
-        rejectResponse('1人2トリップまで');
-        return;
-      }
-    }
-    
     var mute = type === 'SET';
     if (mute && userStatMap[user.id] && userStatMap[user.id].prev === userStatMap[user.id].current)
       return;
@@ -571,6 +560,17 @@
     } else {
       logNonCommand(user);
       return;
+    }
+
+    if (user.trip) {
+      if (!tripsByIhash[user.ihash])
+        tripsByIhash[user.ihash] = new Set();
+      var trips = tripsByIhash[user.ihash];
+      trips.add(user.trip);
+      if (trips.size > 2) {
+        rejectResponse('1人2トリップまで');
+        return;
+      }
     }
 
     var userData = getUserData(user);
@@ -740,6 +740,12 @@
         break;
     }
   });
+  
+  setInterval(async () => {
+    var n = +(await (await fetch('https://raw.githubusercontent.com/iwamizawa-software/daireikai-bot/refs/heads/main/reload.txt?t=' + (new Date).getTime())).text());
+    if (location.hash === '#/room/' + n)
+      location.reload();
+  }, 15 * 60000);
 
 })();
-// signature:D50sXpAx/kkfffkv/mUdU3RBZKC2NHWYM1guTRBwiLsoth310DvZ7gO+sbEDG/UU+Ybyd3aDmqLVubSLR5NtlBX7EaIbI+6rwxkoYbaI
+// signature:yHC4MAA4h4Pf+w0taN5vcuoHng4L/G3qzalrPiJk+N2KTdt/rdK5a5XY6LOp7V73YGHA0yd7uY/Jptq46cKK+b3eiAL/jKdlz1F278Nz

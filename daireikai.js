@@ -566,8 +566,9 @@
       if (!tripsByIhash[user.ihash])
         tripsByIhash[user.ihash] = new Set();
       var trips = tripsByIhash[user.ihash];
-      trips.add(user.trip);
-      if (trips.size > 2) {
+      if (trips.size < 2)
+        trips.add(user.trip);
+      if (!trips.has(user.trip)) {
         rejectResponse('1人2トリップまで');
         return;
       }
@@ -748,4 +749,4 @@
   }, 15 * 60000);
 
 })();
-// signature:yHC4MAA4h4Pf+w0taN5vcuoHng4L/G3qzalrPiJk+N2KTdt/rdK5a5XY6LOp7V73YGHA0yd7uY/Jptq46cKK+b3eiAL/jKdlz1F278Nz
+// signature:XspFlprvQl/ApYMrxk1bJW6YzZ65zMuS1FUwt9S+9iI8iveY4+bU4dJRldhCDrjJMtTsqliwEkFfm6DdU6uj+dDzW2vG2gTKIV+kHfU+

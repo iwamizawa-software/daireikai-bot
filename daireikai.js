@@ -46,9 +46,11 @@
   var seasonData = await Bot.loadAsync('daireikaiSeason') || [];
   
   var userDataMap = await Bot.loadAsync('daireikai') || {};
-  var getUserData = user => {
+  var getUserData = (user, recursion) => {
     var id = typeof user === 'string' ? user : (user.kuro || user.shiro);
     var userData = userDataMap[id] || (userDataMap[id] = {id, tamashii: 0});
+    if (!recursion && userData.original)
+      return getUserData(userData.original, true);
     var time = Math.floor(Date.now() / LIMIT);
     if (userData.time !== time) {
       userData.time = time;
@@ -68,7 +70,7 @@
   };
   
   var userRank;
-  var sortRank = () => userRank = Object.values(userDataMap).sort((a, b) => b.tamashii - a.tamashii);
+  var sortRank = () => userRank = Object.values(userDataMap).filter(u => !u.original).sort((a, b) => b.tamashii - a.tamashii);
   sortRank();
   
   var bc = window.daireikaiChannel || new BroadcastChannel('daireikai');
@@ -137,10 +139,10 @@
   var season = (userData, {n}) => Bot.comment(`シーズン${n}タマシイTOP5:` + seasonData[n].slice(0, 5).map(d => `${d.shortName}(${d.tamashii})`).join(', ') + ` (MP${userData.count})`);
   season.cost = season.muteCost = 1;
   
-  var kyuusai = async userData => {
+  var kyuusai = async (userData, {alias}) => {
     Bot.comment(`みんと「${userData.shortName}の魂(${userData.tamashii})を僕のｶｳﾝｾﾘﾝｸﾞでｱｾﾝｼｮﾝする？」10秒以内 数字回答 1.する 2.しない`);
     bc.postMessage([userData]);
-    var ans = +(await listenTo(/^[12]$/, userData.id, 10000, true));
+    var ans = +(await listenTo(/^[12]$/, alias || userData.id, 10000, true));
     if (ans === 1) {
       userData.tamashii = 0;
       Bot.comment(`${userData.shortName}はｱｾﾝｼｮﾝした(0にリセット) (MP${userData.count})`);
@@ -155,7 +157,7 @@
     onTamashiiChange();
   };
   
-  var poker = async (userData, {bet, mute}) => {
+  var poker = async (userData, {bet, mute, alias}) => {
     var waitForInput = mute ? waitForStat : listenTo;
     var maxBet = Math.min(userData.tamashii, 50);
     if (!bet) {
@@ -165,7 +167,7 @@
         Bot.comment(`BETする${userData.shortName}の魂を1～${maxBet}の間で10秒以内に回答`);
       bc.postMessage([userData]);
     }
-    bet = Math.min(maxBet, bet || +(await waitForInput(/^[1-9]\d*$/, userData.id, 10000, true)));
+    bet = Math.min(maxBet, bet || +(await waitForInput(/^[1-9]\d*$/, alias || userData.id, 10000, true)));
     if (!bet) {
       if (mute)
         Bot.stat('時間切れ MP' + userData.count);
@@ -184,14 +186,14 @@
     var time = Date.now();
     var input = null;
     if (mute) {
-      input = (await waitForInput(/^[0-6]+$/, userData.id, 30000, true)) || '12345';
+      input = (await waitForInput(/^[0-6]+$/, alias || userData.id, 30000, true)) || '12345';
       if (input.includes('6')) {
         Bot.comment(hand.toCardStrings().map(s => '[' + s + ']').join(' '));
         input = null;
       }
     }
     if (input === null)
-      input = (await waitForInput(/^[0-5]+$/, userData.id, 30000 - Date.now() + time, true)) || '12345';
+      input = (await waitForInput(/^[0-5]+$/, alias || userData.id, 30000 - Date.now() + time, true)) || '12345';
     var hold = input.includes('0') ? '' : input.replace(/[12345]/g, n => n - 1);
     var remove = '01234'.split('').filter(n => !hold.includes(n));
     hand.removeAt(remove).append(deck.draw(remove.length));
@@ -254,11 +256,11 @@
     onTamashiiChange();
   };
   
-  var ebumi = async userData => {
+  var ebumi = async (userData, {alias}) => {
     var fumie = fumieContents[Math.floor(Math.random() * fumieContents.length)];
     Bot.comment(`江戸幕府は絵踏みを実施した 30秒以内に ${fumie} と"発言"しなければ魂が半分となる`);
     bc.postMessage([userData]);
-    if (await listenTo(fumie, userData.id, 30000)) {
+    if (await listenTo(fumie, alias || userData.id, 30000)) {
       Bot.comment(`${userData.shortName}は保身に走った(+0) (MP${userData.count})`);
     } else {
       var add = -Math.floor(userData.tamashii / 2);
@@ -341,13 +343,13 @@
     return pays;
   };
   var getWhatifText = (succeeded, field, hand, result = '') => [succeeded, field.toCardStrings()[0] || '**', hand.toCardStrings().join(result ? '' : '　').replace(/Jo/g, '×')].join('｜') + result;
-  var whatif = async (userData, {bet}) => {
+  var whatif = async (userData, {bet, alias}) => {
     var maxBet = Math.min(userData.tamashii, 50);
     if (!bet) {
       Bot.stat('何BET?');
       bc.postMessage([userData]);
     }
-    bet = Math.min(maxBet, bet || +(await waitForStat(/^[1-9]\d*$/, userData.id, 10000, true)));
+    bet = Math.min(maxBet, bet || +(await waitForStat(/^[1-9]\d*$/, alias || userData.id, 10000, true)));
     if (!bet) {
       Bot.stat('時間切れ MP' + userData.count);
       return;
@@ -366,7 +368,7 @@
       var time = Date.now();
       var resent = false;
       do {
-        var input = (await waitForStat(/^[0-6]$/, userData.id, 60000 - Date.now() + time, true)) || '0';
+        var input = (await waitForStat(/^[0-6]$/, alias || userData.id, 60000 - Date.now() + time, true)) || '0';
         if (input === '6') {
           if (!resent)
             Bot.comment(text);
@@ -396,7 +398,7 @@
       return;
     for (var i = 0; i < 3; i++) {
       Bot.comment(`得点${win}でHIGH&LOWに挑戦 20秒以内 状態で回答 0終 1全賭 2半賭`);
-      input = +(await waitForStat(/^[012]$/, userData.id, 20000, true));
+      input = +(await waitForStat(/^[012]$/, alias || userData.id, 20000, true));
       if (!input)
         break;
       bet = input === 1 ? win : Math.floor(win / 2);
@@ -405,12 +407,12 @@
       var cardStrings = hand.toCardStrings();
       var time = Date.now();
       Bot.stat(`[${cardStrings[0]}] [？]＝0低 1高 2発言`);
-      var choice = +(await waitForStat(/^[012]$/, userData.id, 30000, true));
+      var choice = +(await waitForStat(/^[012]$/, alias || userData.id, 30000, true));
       if (choice === 2) {
         var text = `[${cardStrings[0]}] [？]＝0低 1高`;
         Bot.comment(text);
         Bot.stat(text);
-        choice = +(await waitForStat(/^[01]$/, userData.id, 30000 - Date.now() + time, true));
+        choice = +(await waitForStat(/^[01]$/, alias || userData.id, 30000 - Date.now() + time, true));
       }
       var dealer = (hand[0] + 12) % 13;
       var player = (hand[1] + 12) % 13;
@@ -469,6 +471,39 @@
   };
   urami.cost = 1;
   urami.muteCost = 0;
+  
+  var aliasMap = {};
+  var alias = (userData, {aliasTrip}) => {
+    if (userData.id === aliasTrip) {
+      Bot.comment(`自分自身を別名登録しようとしてますよ (MP${userData.count})`);
+      return;
+    }
+    aliasMap[userData.id] = aliasTrip;
+    Bot.comment(`${aliasTrip}でログインして「別名承認${userData.id}」と発言してください (MP${userData.count})`);
+  };
+  alias.cost = alias.muteCost = 1;
+  
+  var acceptAlias = (userData, {originalTrip}) => {
+    if (aliasMap[originalTrip] !== userData.id) {
+      Bot.comment(`${originalTrip}でログインして「別名登録${userData.id}」と発言してください (MP${userData.count})`);
+      return;
+    }
+    userData.original = originalTrip;
+    onTamashiiChange();
+    Bot.comment(`${userData.id}は${originalTrip}としてログインできます`);
+  };
+  acceptAlias.cost = acceptAlias.muteCost = 1;
+
+  var cancelAlias = (userData, {alias}) => {
+    if (!userDataMap[alias]?.original) {
+      Bot.stat('別名じゃない');
+      return;
+    }
+    userDataMap[alias].original = '';
+    onTamashiiChange();
+    Bot.stat('別名解除完了');
+  };
+  cancelAlias.cost = cancelAlias.muteCost = 0;
   
   var kinku = userData => {
     Bot.stat(`${userData.shortName.slice(0, 10)} -1000 MP0`);
@@ -557,6 +592,14 @@
       game = season;
     } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:恨|うら)み$/.test(cmt)) {
       game = urami;
+    } else if (/^別名登録\s*(◆.{10})$/.test(realCmt)) {
+      game = alias;
+      options.aliasTrip = RegExp.$1;
+    } else if (/^別名承認\s*(◆.{10})$/.test(realCmt)) {
+      game = acceptAlias;
+      options.originalTrip = RegExp.$1;
+    } else if (/^別名解除$/.test(realCmt)) {
+      game = cancelAlias;
     } else {
       logNonCommand(user);
       return;
@@ -566,15 +609,17 @@
       if (!tripsByIhash[user.ihash])
         tripsByIhash[user.ihash] = new Set();
       var trips = tripsByIhash[user.ihash];
-      if (trips.size < 2)
+      if (trips.size < 3)
         trips.add(user.trip);
       if (!trips.has(user.trip)) {
-        rejectResponse('1人2トリップまで');
+        rejectResponse('1人3トリップまで');
         return;
       }
     }
 
     var userData = getUserData(user);
+    if (userData.id[0] === '◆' && userData.id !== user.kuro)
+      options.alias = user.kuro;
     var cost = game[mute ? 'muteCost' : 'cost'];
     if (userData.count < cost) {
       rejectResponse(userData.count ? `MP${cost}未満` : 'MP0');
@@ -749,4 +794,4 @@
   }, 15 * 60000);
 
 })();
-// signature:XspFlprvQl/ApYMrxk1bJW6YzZ65zMuS1FUwt9S+9iI8iveY4+bU4dJRldhCDrjJMtTsqliwEkFfm6DdU6uj+dDzW2vG2gTKIV+kHfU+
+// signature:LxMZaV6iwDkIXGzDSYrLRADJlhcbQDySUPMyzW8RqN3dsaxB2UxeZpwQc+vJY/mVoA9HuaP2yJuZ+0yZvBkEcaQ/zZloezas5YvjXI5y

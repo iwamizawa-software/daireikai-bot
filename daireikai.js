@@ -679,7 +679,7 @@
 
   on('COM', async user => {
   
-    if (user.id === Bot.myId || !['SOW9cAv7B2', 'bbbbbbbbB.'].includes(user.trip) || !user.cmt)
+    if (user.id === Bot.myId || !['uuuuuuuuoNin', 'bbbbbbbbB.'].includes(user.trip) || !user.cmt)
       return;
 
     var command = user.cmt.split(/\s+/);
@@ -758,7 +758,7 @@
   var botStartTime = new Date();
   on('COM', async user => {
   
-    if (user.id === Bot.myId || !['SOW9cAv7B2', 'bbbbbbbbB.'].includes(user.trip) || !user.cmt)
+    if (user.id === Bot.myId || !['uuuuuuuuoNin', 'bbbbbbbbB.'].includes(user.trip) || !user.cmt)
       return;
 
     var command = user.cmt.split(/\s+/);
@@ -794,4 +794,4 @@
   }, 15 * 60000);
 
 })();
-// signature:idfO//ee9GVMulHTHtBLr9W4qUHLJK8bPTEHZtESrGbbxlUJcVDYYs1ffmjBkL9I7QBxtj2k3IO/zAuJHXzjHdIS5TAyIQyabutofw6y
+// signature:CjRmleZS6o33vAzgDJXh5K9jmXqvSbUh/IGFmbVtbVeicaU+8gUx3/ChZpVPxMskZJknm0qTneXAjLvVdBDU1oqlSm8zOoz7CFsBiui6

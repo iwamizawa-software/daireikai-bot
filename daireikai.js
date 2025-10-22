@@ -592,10 +592,10 @@
       game = season;
     } else if (/^(?:大霊界|だいれいかい|魂|たましい)の?(?:恨|うら)み$/.test(cmt)) {
       game = urami;
-    } else if (/^別名登録\s*(◆.{10})/.test(realCmt)) {
+    } else if (/^別名登録\s*(◆.{10,12})\s$/.test(realCmt)) {
       game = alias;
       options.aliasTrip = RegExp.$1;
-    } else if (/^別名承認\s*(◆.{10})/.test(realCmt)) {
+    } else if (/^別名承認\s*(◆.{10,12})\s$/.test(realCmt)) {
       game = acceptAlias;
       options.originalTrip = RegExp.$1;
     } else if (/^別名解除$/.test(realCmt)) {
@@ -794,4 +794,4 @@
   }, 15 * 60000);
 
 })();
-// signature:CjRmleZS6o33vAzgDJXh5K9jmXqvSbUh/IGFmbVtbVeicaU+8gUx3/ChZpVPxMskZJknm0qTneXAjLvVdBDU1oqlSm8zOoz7CFsBiui6
+// signature:mWbxo1xyHIL70o9ZOsrVwb50h28v1vDmcbama5qoCwsqzqDL8/jBhOQu5KYAe2krMAFb8GXG8hfcX1v839YwNT26798ZS7uyxnDCt1n9

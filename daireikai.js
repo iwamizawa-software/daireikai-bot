@@ -701,7 +701,11 @@
         }
         break;
       case '魂不正':
-        var userData = getUserData(command[1]);
+        var userData = userDataMap[command[1]];
+        if (!userData) {
+          Bot.stat('不正失敗');
+          break;
+        }
         userData[command[2]] = JSON.parse(command[3]);
         onTamashiiChange();
         bc.postMessage([userData]);
@@ -794,4 +798,4 @@
   }, 15 * 60000);
 
 })();
-// signature:Un1DqpVBGvk16wcbQrdloFFNwbup8U3UCN7W3VVQryvIgtGbAyTdaCcyrgqD6/dEakrdyKyXIVdQjyPVvLmy8tkdAbl9L34j1nONLJKC
+// signature:9ca2Zswur8WAzrWJhhAW6kRSvKyVO3p3sNanx2xQonCo3PDJzZ5S5QsVVNVOXe35cN6SEV1P9HiO2IRlGcVo6+qK41TruI7ijO+oi+Yl

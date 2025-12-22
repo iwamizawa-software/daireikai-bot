@@ -211,7 +211,7 @@
       'ワンペア': 1,
       'はずれ': 0
     }[handRank];
-    var add = rate * bet;
+    var add = rate * bet * (location.hash === '#/room/15' ? 1 : 2);
     if (mute) {
       var shortHandRank = {
         'ファイブカード': '5C',
@@ -798,4 +798,4 @@
   }, 15 * 60000);
 
 })();
-// signature:9ca2Zswur8WAzrWJhhAW6kRSvKyVO3p3sNanx2xQonCo3PDJzZ5S5QsVVNVOXe35cN6SEV1P9HiO2IRlGcVo6+qK41TruI7ijO+oi+Yl
+// signature:wh6qcoNIhRllZrRFPTLYfXKerX4gBY+xraV/O/3yeni2QJP2qNPIYacaH6M2QyZtxpyao/HMloFUfFLIjyTMR/5K7ta6rWQovsF65t2P

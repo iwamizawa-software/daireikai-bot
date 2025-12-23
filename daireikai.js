@@ -5,9 +5,19 @@
   var MAX_LOG = 500;
 
   try {
+    await Bot.loadAsync('daireikaiSeason');
+  } catch (err) {
+    Bot.comment('a');
+  }
+  try {
+    await Bot.loadAsync('daireikai');
+  } catch (err) {
+    Bot.comment('b');
+  }
+
+  try {
     var daireikaiKujiArguments = JSON.parse(await Bot.decrypt('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'));
     var seminarContents = JSON.parse(await Bot.decrypt('DW+Gs3TJ1bzxvfYP1zM1ZmLGfTMyHcv069lI7+hfmrypMg5AJlo1An86HnKYC0pbSS3Q1eXhtnQI+ZOrWumjzUCssXviP5x6BRxbR45xI11/gXjfazjJEcFTiY4tYJK+YQbFemA5'));
-    Bot.saveAsync('daireikaiWebhook', await Bot.decrypt('GA/JP+ErlRCy3hGD3sLLV9l9lu5TJokBylXDyskcVZMuC7vxPSvNVvzyH8LxO5mcLJNbYl9iDiFrQi2f4lG0lB3o7bUWqu8lYzb3dS83HfoU8qGWxHpSuizFmGLmdymfjGWOGLW5Xj3RARvl/eb66eV90ulIQ+OMiycl+aa6t0lWiLpIuU0UGB0kcy1GyTGnni1iRze2VwAqVqFUah09Y+PXBWk14Es='));
   } catch (err) {
     setTimeout(() => Bot.stat('大霊界BOT起動失敗'), 5000);
     return;
@@ -799,4 +809,4 @@
   }, 15 * 60000);
 
 })();
-// signature:HF3cvC6R3ajKWW2P45XrE3bDiBnx7A4HD7DcBlSeEo3K6hm1tE9QaGXR8ZTTNtgOch4poZSwvCPjftTVYEVpPyejBYH7eH+/QSPrIKNr
+// signature:dm7MKLukDFgN10FlDe1wJkstBeXN96aWZmarybBLE4e51E6qtueIcKznmnP6aGcnRJl1PSgBMAZKKUqK1qys07pbD1V3KKqXJGk1jdIZ

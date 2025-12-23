@@ -43,9 +43,9 @@
     statLogs.splice(0, statLogs.length - MAX_LOG);
   };
   
-  var seasonData = Bot.load('daireikaiSeason') || [];
+  var seasonData = JSON.parse(Bot.load('daireikaiSeason')) || [];
   
-  var userDataMap = Bot.load('daireikai') || {};
+  var userDataMap = JSON.parse(Bot.load('daireikai')) || {};
   
   var getUserData = (user, recursion) => {
     var id = typeof user === 'string' ? user : (user.kuro || user.shiro);
@@ -91,7 +91,7 @@
   
   var onTamashiiChange = () => {
     sortRank();
-    Bot.save('daireikai', userDataMap);
+    Bot.save('daireikai', JSON.stringify(userDataMap));
   };
   
   var formatPoint = n => `(${(n >= 0 ? '+' : '') + n})`;
@@ -803,4 +803,4 @@
   }, 15 * 60000);
 
 })();
-// signature:GYaPk9pjBLFIH4TbuYXcpm/waxq001TWhoHpMCZ2CmuJ1dD5kSDwyvv/D/fEfguDJXkmcF6LJWfpGY6/EyH754BbBnvFkEAX3c1p8rY1
+// signature:6ZosMWr/+Go1pKE9yfN9AIpzXy0qv/ClCIoqltrQf0FuKUYFcqzdPknZMm7S7jMktCbdJ8QzLEGmFH1oyh+DzEuJfpUROaVkNfrO1vSh

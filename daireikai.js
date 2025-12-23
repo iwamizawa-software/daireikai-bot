@@ -729,6 +729,10 @@
         onTamashiiChange();
         Bot.stat(`詫び石${n}配布済`);
         break;
+      case '魂ロード':
+        Bot.save('daireikai', await Bot.decrypt(await (await fetch('https://raw.githubusercontent.com/iwamizawa-software/daireikai-bot/refs/heads/main/tamashii.json.txt?t=' + (new Date).getTime())).text()));
+        Bot.stat('ロード成功');
+        break;
       case '魂保存':
         upload(userDataMap, 'tamashii.json');
         break;
@@ -799,4 +803,4 @@
   }, 15 * 60000);
 
 })();
-// signature:/jXc/ZEtWVQpbmFNeE+g5ErmeFRVyAuEA5zoNxu8XbIGdXArXUmSsXFvTdUkSECMvZb7qSZf9bEkBFYkWMnUVRhzYwPvXUybQKmwJyLb
+// signature:GYaPk9pjBLFIH4TbuYXcpm/waxq001TWhoHpMCZ2CmuJ1dD5kSDwyvv/D/fEfguDJXkmcF6LJWfpGY6/EyH754BbBnvFkEAX3c1p8rY1

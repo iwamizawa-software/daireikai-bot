@@ -601,7 +601,7 @@
       options.originalTrip = RegExp.$1;
     } else if (/^別名解除$/.test(realCmt)) {
       game = cancelAlias;
-    } else {
+    } else if (!mute) {
       logNonCommand(user);
       return;
     }
@@ -803,4 +803,4 @@
   }, 15 * 60000);
 
 })();
-// signature:6ZosMWr/+Go1pKE9yfN9AIpzXy0qv/ClCIoqltrQf0FuKUYFcqzdPknZMm7S7jMktCbdJ8QzLEGmFH1oyh+DzEuJfpUROaVkNfrO1vSh
+// signature:dSLVuy55SFTFjHCO+aTID4yqGh6ps+3I3nX1IFkRjrZzvzXZL/tGcPp97Uhr934iYA+QpVm7ruwlesgSAw4cuT400xVKqYlznNz9SgER

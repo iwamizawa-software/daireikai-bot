@@ -1,7 +1,7 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 12;
+  var VERSION = 13;
   var MAX_LOG = 500;
 
   try {
@@ -601,8 +601,9 @@
       options.originalTrip = RegExp.$1;
     } else if (/^別名解除$/.test(realCmt)) {
       game = cancelAlias;
-    } else if (!mute) {
-      logNonCommand(user);
+    } else {
+      if (!mute)
+        logNonCommand(user);
       return;
     }
 
@@ -803,4 +804,4 @@
   }, 15 * 60000);
 
 })();
-// signature:dSLVuy55SFTFjHCO+aTID4yqGh6ps+3I3nX1IFkRjrZzvzXZL/tGcPp97Uhr934iYA+QpVm7ruwlesgSAw4cuT400xVKqYlznNz9SgER
+// signature:roMA71cQFSOY2GsLN8aJtFtuThCiMMt/Cb4PtWqx5V2MIo3sv5c3SiiC11P5WeQADZe40AeW1lVIEfQLjatXw2kZjaVKB8p92WNoXmN/

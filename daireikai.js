@@ -47,18 +47,18 @@
   
   var userDataMap = JSON.parse(Bot.load('daireikai')) || {};
   
-  var getUserData = (user, recursion) => {
+  var getUserData = (user, name, recursion) => {
     var id = typeof user === 'string' ? user : (user.kuro || user.shiro);
     var userData = userDataMap[id] || (userDataMap[id] = {id, tamashii: 0});
     if (!recursion && userData.original)
-      return getUserData(userData.original, true);
+      return getUserData(userData.original, user.name, true);
     var time = Math.floor(Date.now() / LIMIT);
     if (userData.time !== time) {
       userData.time = time;
       userData.count = Math.max(5, userData.count || 0);
     }
-    if (user.name) {
-      userData.shortName = user.name.replace(/◇.{6}$/, '');
+    if (name = name || user.name) {
+      userData.shortName = name.replace(/◇.{6}$/, '');
       userData.name = userData.shortName + id;
     }
     if (!userData.achievementMap)
@@ -819,4 +819,4 @@
   }, 15 * 60000);
 
 })();
-// signature:C9pTTDpXWSgkosqNPmPKvaL71drpyk2Am/as8YbYqXhMBMXnLkSXM23aubRn0bZsXLk8ux9MUqSxkED2usprxys57nDZFI70pzJojFYu
+// signature:88i9AsH9kI809KTk9BeNEXuPBvJSUPFz+9KyJaR+niaFHGO7/wiaZEoKZ0XvpKLgsvWzVz3/v06V1jnvgvj7p2c0Wgtl6CgR9AuLAYkE

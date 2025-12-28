@@ -1,7 +1,7 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 14;
+  var VERSION = 15;
   var MAX_LOG = 500;
 
   try {
@@ -746,6 +746,9 @@
       case '状態ログ保存':
         upload(statLogs, 'stat-log.json');
         break;
+      case 'ユーザーリスト保存':
+        upload(Bot.users, 'user-list.json');
+        break;
       case '魂調査':
         upload(statLogs, 'stat-log.json');
         upload(Object.entries(Bot.listeners).map(([type, listeners]) => [type, listeners.map(listener => Object.assign({listener: (listener + '').slice(0, 100)}, listener))]), 'listeners.json');
@@ -816,4 +819,4 @@
   }, 15 * 60000);
 
 })();
-// signature:oEtd0X78OhsXHdMxpU8+llREZ9cVRsEDvXS/MoZddjptjhSfLpyOIFdqaiceRlyooojli50FjCtCNYbwcrMBdOkS2Y/uDOORlxmrHMUd
+// signature:C9pTTDpXWSgkosqNPmPKvaL71drpyk2Am/as8YbYqXhMBMXnLkSXM23aubRn0bZsXLk8ux9MUqSxkED2usprxys57nDZFI70pzJojFYu

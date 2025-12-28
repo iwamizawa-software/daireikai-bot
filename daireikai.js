@@ -1,7 +1,7 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 13;
+  var VERSION = 14;
   var MAX_LOG = 500;
 
   try {
@@ -212,7 +212,7 @@
       'ワンペア': 1,
       'はずれ': 0
     }[handRank];
-    var add = rate * bet * (location.hash === '#/room/15' ? 1 : 2);
+    var add = rate * bet;
     if (mute) {
       var shortHandRank = {
         'ファイブカード': '5C',
@@ -760,6 +760,18 @@
   
   if (pause)
     setTimeout(() => Bot.stat('大霊界BOT停止中'), 5000);
+  else if (location.hash !== '#/room/15')
+    setInterval(() => {
+      var userDataList = [...(new Set(Object.values(Bot.users).filter(u => u.id !== Bot.myId).map(u => getUserData(u))))];
+      if (!userDataList.length)
+        return;
+      userDataList.forEach(userData => {
+        userData.tamashii += 25;
+        logTamashii(userData, '常駐');
+      });
+      onTamashiiChange();
+      bc.postMessage(userDataList);
+    }, 15 * 60000);
 
 })();
 
@@ -804,4 +816,4 @@
   }, 15 * 60000);
 
 })();
-// signature:roMA71cQFSOY2GsLN8aJtFtuThCiMMt/Cb4PtWqx5V2MIo3sv5c3SiiC11P5WeQADZe40AeW1lVIEfQLjatXw2kZjaVKB8p92WNoXmN/
+// signature:oEtd0X78OhsXHdMxpU8+llREZ9cVRsEDvXS/MoZddjptjhSfLpyOIFdqaiceRlyooojli50FjCtCNYbwcrMBdOkS2Y/uDOORlxmrHMUd

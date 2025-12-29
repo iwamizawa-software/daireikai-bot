@@ -749,6 +749,9 @@
       case 'ユーザーリスト保存':
         upload(Bot.users, 'user-list.json');
         break;
+      case 'ランク保存':
+        upload(userRank, 'rank.json');
+        break;
       case '魂調査':
         upload(statLogs, 'stat-log.json');
         upload(Object.entries(Bot.listeners).map(([type, listeners]) => [type, listeners.map(listener => Object.assign({listener: (listener + '').slice(0, 100)}, listener))]), 'listeners.json');
@@ -819,4 +822,4 @@
   }, 15 * 60000);
 
 })();
-// signature:88i9AsH9kI809KTk9BeNEXuPBvJSUPFz+9KyJaR+niaFHGO7/wiaZEoKZ0XvpKLgsvWzVz3/v06V1jnvgvj7p2c0Wgtl6CgR9AuLAYkE
+// signature:rONPXedMsH8SmWmaJ4STnCjN0xscIquHvJOn3VajobdEgSTtR2udC/wlaaYMRwJz1amz+R4cTUDILmaJCazG1Z3d2wPYTmmo+zlaxeun

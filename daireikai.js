@@ -433,7 +433,7 @@
   whatif.cost = whatif.muteCost = 2;
   
   var nonti = userData => {
-    Bot.comment(`うむ ${userData.shortName}(+10) (MP${userData.count})`);
+    Bot.comment(`うむ (+10) (MP${userData.count})`);
     userData.tamashii += 10;
     userData.nCount++;
     if (userData.nCount >= 10)
@@ -822,4 +822,4 @@
   }, 15 * 60000);
 
 })();
-// signature:hjm7b35tI6UD5CXwi6Hp26YaeSRatVRNQQwDpvehlduI9R4qdkrePwxhiL7H3DKxWJWhh0JWUZ8yznBw/v/yaKgdqxBLGMPLqAb2woBs
+// signature:1joMWTWD+tCN73h9gNtCjmIuP0UN8ECui8lGM2/lTFMhG5Dz/ZTh5ceOIXOmuLA8ij4ExbG3D/7UisSjWpngbdp5v8d4VqJ0b//1EHSt

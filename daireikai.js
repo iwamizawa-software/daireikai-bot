@@ -165,7 +165,7 @@
       if (mute)
         Bot.stat('何BET?');
       else
-        Bot.comment(`BETする${userData.shortName}の魂を1～${maxBet}の間で10秒以内に回答`);
+        Bot.comment(`BETする魂を1～${maxBet}の間で10秒以内に回答`);
       bc.postMessage([userData]);
     }
     bet = Math.min(maxBet, bet || +(await waitForInput(/^[1-9]\d*$/, alias || userData.id, 10000, true)));
@@ -822,4 +822,4 @@
   }, 15 * 60000);
 
 })();
-// signature:rONPXedMsH8SmWmaJ4STnCjN0xscIquHvJOn3VajobdEgSTtR2udC/wlaaYMRwJz1amz+R4cTUDILmaJCazG1Z3d2wPYTmmo+zlaxeun
+// signature:hjm7b35tI6UD5CXwi6Hp26YaeSRatVRNQQwDpvehlduI9R4qdkrePwxhiL7H3DKxWJWhh0JWUZ8yznBw/v/yaKgdqxBLGMPLqAb2woBs

@@ -734,6 +734,22 @@
         Bot.save('daireikai', await Bot.decrypt(await (await fetch('https://raw.githubusercontent.com/iwamizawa-software/daireikai-bot/refs/heads/main/tamashii.json.txt?t=' + (new Date).getTime())).text()));
         Bot.stat('ロード成功');
         break;
+      case 'シーズンロード':
+        var seasonJSON = await Bot.decrypt(await (await fetch('https://raw.githubusercontent.com/iwamizawa-software/daireikai-bot/refs/heads/main/season.json.txt?t=' + (new Date).getTime())).text());
+        Bot.save('daireikaiSeason', seasonJSON);
+        seasonData = JSON.parse(seasonJSON);
+        Bot.stat('ロード成功');
+        break;
+      case 'シーズンリセット':
+        await upload(userDataMap, 'tamashii.json');
+        seasonData.push(userRank.slice(0, 10));
+        var seasonJSON = JSON.stringify(seasonData);
+        Bot.save('daireikaiSeason', seasonJSON);
+        seasonData = JSON.parse(seasonJSON);
+        Object.values(userDataMap).forEach(d => d.tamashii = 0);
+        onTamashiiChange();
+        Bot.stat('リセット完了');
+        break;
       case '魂保存':
         upload(userDataMap, 'tamashii.json');
         break;
@@ -772,7 +788,7 @@
       if (!userDataList.length)
         return;
       userDataList.forEach(userData => {
-        userData.tamashii += 25;
+        userData.tamashii += 2;
         logTamashii(userData, '常駐');
       });
       onTamashiiChange();
@@ -822,4 +838,4 @@
   }, 15 * 60000);
 
 })();
-// signature:1joMWTWD+tCN73h9gNtCjmIuP0UN8ECui8lGM2/lTFMhG5Dz/ZTh5ceOIXOmuLA8ij4ExbG3D/7UisSjWpngbdp5v8d4VqJ0b//1EHSt
+// signature:jSs/l1lXUMOQ9pRqyvsltUPlH8m+Vh4lj8NBYsB3Pi/QfEqlmqEWA7dlCMgM7dZf8TugYkELrsjfMAGzs9woZmyY7M4aR4+StedrysyY

@@ -746,6 +746,7 @@
         var seasonJSON = JSON.stringify(seasonData);
         Bot.save('daireikaiSeason', seasonJSON);
         seasonData = JSON.parse(seasonJSON);
+        await upload(seasonData, 'season.json');
         Object.values(userDataMap).forEach(d => d.tamashii = 0);
         onTamashiiChange();
         Bot.stat('リセット完了');
@@ -838,4 +839,4 @@
   }, 15 * 60000);
 
 })();
-// signature:jSs/l1lXUMOQ9pRqyvsltUPlH8m+Vh4lj8NBYsB3Pi/QfEqlmqEWA7dlCMgM7dZf8TugYkELrsjfMAGzs9woZmyY7M4aR4+StedrysyY
+// signature:5MFYEiu9KnakpYRWm9nbgTmC2p8H8Ez+qEJq4yBs39UJAz3WA2jXq5zpQrbHcyFWp/OmoK5tCfxoEv5/6yhuBS1w9bV/0H4dR185tv1c

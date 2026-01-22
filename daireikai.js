@@ -18,6 +18,8 @@
   ];
   var denyList = new Set();
   
+  var isSaitama = () => location.hash === '#/room/15';
+  
   var tamashiiLogs = [];
   var logTamashii = (userData, note) => {
     var log = Object.assign({timestamp: (new Date()).toLocaleString(), note}, userData);
@@ -383,6 +385,15 @@
       selectableIndexes = hand.map((c, i) => c !== -1 && (Math.floor(field[0] / 13) === Math.floor(c / 13) || field[0] % 13 === c % 13) ? i : null).filter(i => i !== null);
       win += whatifBonus(userData, bet, hand);
       succeeded++;
+      if (succeeded >= 20) {
+        if (succeeded >= 30) {
+          if (succeeded >= 40)
+            unlockAchievement(userData, 'whatif40達成', {addTamashii: 5000});
+          else
+            unlockAchievement(userData, 'whatif30達成', {addTamashii: 1000});
+        } else
+          unlockAchievement(userData, 'whatif20達成', {addTamashii: 100});
+      }
     } while (selectableIndexes.length);
     win += [
        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -394,7 +405,7 @@
     ][succeeded] * bet;
     Bot.stat(getWhatifText(succeeded, field, hand, win ? '勝ち' : '終了'));
     if (succeeded === 52)
-      unlockAchievement(userData, 'whatif制覇');
+      unlockAchievement(userData, 'whatif制覇', {addTamashii: 10000});
     if (!win)
       return;
     for (var i = 0; i < 3; i++) {
@@ -633,7 +644,7 @@
       logTamashii(userData, cmt + 'tamashii0');
       return;
     }
-    if (game === whatif && (new Date()).getMinutes() < 30) {
+    if (isSaitama() && game === whatif && (new Date()).getMinutes() < 30) {
       rejectResponse('可能時間' + (new Date()).getHours() + ':30～59');
       logTamashii(userData, cmt + 'whatiftime');
       return;
@@ -783,7 +794,7 @@
   
   if (pause)
     setTimeout(() => Bot.stat('大霊界BOT停止中'), 5000);
-  else if (location.hash !== '#/room/15')
+  else if (!isSaitama())
     setInterval(() => {
       var userDataList = [...(new Set(Object.values(Bot.users).filter(u => u.id !== Bot.myId).map(u => getUserData(u))))];
       if (!userDataList.length)
@@ -839,4 +850,4 @@
   }, 15 * 60000);
 
 })();
-// signature:5MFYEiu9KnakpYRWm9nbgTmC2p8H8Ez+qEJq4yBs39UJAz3WA2jXq5zpQrbHcyFWp/OmoK5tCfxoEv5/6yhuBS1w9bV/0H4dR185tv1c
+// signature:nk4IXX1Ao2rGYANdjgpQkKf03QPNoCmrl/8bIv2VVaiBmGHCFS9Il1NyONCFsZyvJrTbgqHZjPkGvyp3Du4ibAM+Ax13Fj0JP4AR3OSa

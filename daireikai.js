@@ -792,9 +792,9 @@
     
   });
   
-  if (pause)
+  if (pause) {
     setTimeout(() => Bot.stat('大霊界BOT停止中'), 5000);
-  else if (!isSaitama())
+  } else if (!isSaitama()) {
     setInterval(() => {
       var userDataList = [...(new Set(Object.values(Bot.users).filter(u => u.id !== Bot.myId).map(u => getUserData(u))))];
       if (!userDataList.length)
@@ -806,6 +806,8 @@
       onTamashiiChange();
       bc.postMessage(userDataList);
     }, 15 * 60000);
+    setInterval(() => upload(userDataMap, 'tamashii.json'), 24 * 60 * 60000);
+  }
 
 })();
 
@@ -850,4 +852,4 @@
   }, 15 * 60000);
 
 })();
-// signature:nk4IXX1Ao2rGYANdjgpQkKf03QPNoCmrl/8bIv2VVaiBmGHCFS9Il1NyONCFsZyvJrTbgqHZjPkGvyp3Du4ibAM+Ax13Fj0JP4AR3OSa
+// signature:yx7T782On3T8FTrDHbkHGecwVmXuRfYaMPr8YBEMliQ0c5gkT5nO3yUXaqzLmLerdhzasymTiChw7F4QqtAW5C/4OlIrho32N8b40GIi

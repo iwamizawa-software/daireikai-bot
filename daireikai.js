@@ -41,14 +41,16 @@
     userDataMap = daireikaiBot.userDataMap || {};
     setTimeout(() => Bot.stat('ロード' + Math.floor(daireikaiBot.time / 1000).toString(36)), 5000);
   };
-  var saveTimer;
+  var saveTimer = null;
   var tamashiiSave = forced => {
-    if (!isSasuga())
+    if (!isSasuga() || (!forced && saveTimer !== null))
       return;
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-      method: 'set', password: apiPassword, key: 'daireikaiBot', value: { time: Date.now(), seasonData, userDataMap }
-    })}), forced ? 0 : 5 * 60000);
+    saveTimer = setTimeout(() => {
+      saveTimer = null;
+      fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+        method: 'set', password: apiPassword, key: 'daireikaiBot', value: { time: Date.now(), seasonData, userDataMap }
+      })});
+    }, forced ? 0 : 5 * 60000);
   };
   
   var tamashiiLogs = [];
@@ -854,4 +856,4 @@
   }, 15 * 60000);
 
 })();
-// signature:C00CjiaXpwGq3JDifCTmr5afEKm4+Ppw4xpECIgbaK0yzGSfXPdQ37VItzGrgT9YXSAhLj1S7zAeNffW5/q//066LMnXMCa2Fr3qCuwm
+// signature:0FnReAG2hA0juyd4n7SfLFoSHAKUVnC25XRCZ9AyZ6mIdVVrKGQUPhH/uIyt8kEXjbH4IkYN6Sz5+xQ7sEsUM5dQNZWE7ZLPNS7d3G5h

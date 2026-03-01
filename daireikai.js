@@ -3,10 +3,13 @@
   var LIMIT = 60 * 60 * 1000;
   var VERSION = 15;
   var MAX_LOG = 500;
+  var API_URL = 'https://sub-chat.onrender.com/bot';
 
   try {
     var daireikaiKujiArguments = JSON.parse(await Bot.decrypt('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'));
     var seminarContents = JSON.parse(await Bot.decrypt('DW+Gs3TJ1bzxvfYP1zM1ZmLGfTMyHcv069lI7+hfmrypMg5AJlo1An86HnKYC0pbSS3Q1eXhtnQI+ZOrWumjzUCssXviP5x6BRxbR45xI11/gXjfazjJEcFTiY4tYJK+YQbFemA5'));
+    var apiPassword = await Bot.decrypt('ErAWRVY205Yq/b/qbnTIL4fXtoNTqK5gRvC6HoAG/r1t4883SX6rNMy7WdaLca3D2U+lAe1SZDfMWvbADLig0+3shwNpfJx4ML47K4DL');
+    var daireikaiWebhook = await Bot.decrypt('I6hesiVy+86glz0Kx9xkArEIM3gdnHpSEEbH+yrWj/weI5reNeh26QUacCM0WSoIobS/p0wKRV20XGANNcDRPXx4JbiqB/jhKi0RybQing8aHjHj2JNumH86Z4+OtSx020A+8Dsb9T4xc3fA4zAiVQ5hxhIf5EsnrC1NGNq4goJUVFGR7NMQvSFZIwVYf0egMxWtDSpdPLdQ/vT9m6PUgzRhVgy/os4=');
   } catch (err) {
     setTimeout(() => Bot.stat('大霊界BOT起動失敗'), 5000);
     return;
@@ -18,7 +21,35 @@
   ];
   var denyList = new Set();
   
-  var isSaitama = () => location.hash === '#/room/15';
+  var ddc = window.daireikaiDataChannel || new BroadcastChannel('daireikaiData');
+  window.daireikaiDataChannel = ddc;
+  var isSasuga = () => location.hash === '#/room/20';
+  var tamashiiLoad = async () => {
+    if (isSasuga()) {
+      var daireikaiBot = await (await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+        method: 'get', password: apiPassword, key: 'daireikaiBot'
+      })})).json();
+      ddc.postMessage(daireikaiBot);
+    } else {
+      var daireikaiBot = await new Promise(resolve => ddc.onmessage = event => resolve(event.data));
+    }
+    if (!daireikaiBot) {
+      setTimeout(() => Bot.stat('魂ロード失敗'), 5000);
+      throw new Error('魂ロード失敗');
+    }
+    seasonData = daireikaiBot.seasonData || [];
+    userDataMap = daireikaiBot.userDataMap || {};
+    setTimeout(() => Bot.stat('ロード' + Math.floor(daireikaiBot.time / 1000).toString(36)), 5000);
+  };
+  var saveTimer;
+  var tamashiiSave = forced => {
+    if (!isSasuga())
+      return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+      method: 'set', password: apiPassword, key: 'daireikaiBot', value: { time: Date.now(), seasonData, userDataMap }
+    })}), forced ? 0 : 10 * 60000);
+  };
   
   var tamashiiLogs = [];
   var logTamashii = (userData, note) => {
@@ -45,9 +76,10 @@
     statLogs.splice(0, statLogs.length - MAX_LOG);
   };
   
-  var seasonData = JSON.parse(Bot.load('daireikaiSeason')) || [];
+  var seasonData, userDataMap;
   
-  var userDataMap = JSON.parse(Bot.load('daireikai')) || {};
+  setTimeout(() => Bot.stat('魂ロード待ち'), 3000);
+  await tamashiiLoad();
   
   var getUserData = (user, name, recursion) => {
     var id = typeof user === 'string' ? user : (user.kuro || user.shiro);
@@ -93,7 +125,7 @@
   
   var onTamashiiChange = () => {
     sortRank();
-    Bot.save('daireikai', JSON.stringify(userDataMap));
+    tamashiiSave();
   };
   
   var formatPoint = n => `(${(n >= 0 ? '+' : '') + n})`;
@@ -644,7 +676,7 @@
       logTamashii(userData, cmt + 'tamashii0');
       return;
     }
-    if (isSaitama() && game === whatif && (new Date()).getMinutes() < 30) {
+    if (!isSasuga() && game === whatif && (new Date()).getMinutes() < 30) {
       rejectResponse('可能時間' + (new Date()).getHours() + ':30～59');
       logTamashii(userData, cmt + 'whatiftime');
       return;
@@ -672,19 +704,13 @@
   });
   
   var upload = async (obj, fname) => {
-    var url = Bot.load('daireikaiWebhook');
-    if (url) {
-      var formData = new FormData();
-      formData.append('file', new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' }), fname);
-      try {
-        await fetch(url, {method: 'POST', body: formData});
-        Bot.stat('保存成功');
-      } catch (err) {
-        Bot.stat('保存エラー');
-        return false;
-      }
-    } else {
-      Bot.stat('URL未登録');
+    var formData = new FormData();
+    formData.append('file', new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' }), fname);
+    try {
+      await fetch(daireikaiWebhook, {method: 'POST', body: formData});
+      Bot.stat('保存成功');
+    } catch (err) {
+      Bot.stat('保存エラー');
       return false;
     }
     return true;
@@ -742,28 +768,11 @@
         Bot.stat(`詫び石${n}配布済`);
         break;
       case '魂ロード':
-        Bot.save('daireikai', await Bot.decrypt(await (await fetch('https://raw.githubusercontent.com/iwamizawa-software/daireikai-bot/refs/heads/main/tamashii.json.txt?t=' + (new Date).getTime())).text()));
-        Bot.stat('ロード成功');
-        break;
-      case 'シーズンロード':
-        var seasonJSON = await Bot.decrypt(await (await fetch('https://raw.githubusercontent.com/iwamizawa-software/daireikai-bot/refs/heads/main/season.json.txt?t=' + (new Date).getTime())).text());
-        Bot.save('daireikaiSeason', seasonJSON);
-        seasonData = JSON.parse(seasonJSON);
-        Bot.stat('ロード成功');
-        break;
-      case 'シーズンリセット':
-        await upload(userDataMap, 'tamashii.json');
-        seasonData.push(userRank.slice(0, 10));
-        var seasonJSON = JSON.stringify(seasonData);
-        Bot.save('daireikaiSeason', seasonJSON);
-        seasonData = JSON.parse(seasonJSON);
-        await upload(seasonData, 'season.json');
-        Object.values(userDataMap).forEach(d => d.tamashii = 0);
-        onTamashiiChange();
-        Bot.stat('リセット完了');
+        await tamashiiLoad();
         break;
       case '魂保存':
-        upload(userDataMap, 'tamashii.json');
+        tamashiiSave(true);
+        upload({ time: Date.now(), seasonData, userDataMap }, 'tamashii.json');
         break;
       case '魂ログ保存':
         upload(tamashiiLogs, 'tamashii-log.json');
@@ -784,17 +793,11 @@
         upload(statLogs, 'stat-log.json');
         upload(Object.entries(Bot.listeners).map(([type, listeners]) => [type, listeners.map(listener => Object.assign({listener: (listener + '').slice(0, 100)}, listener))]), 'listeners.json');
         break;
-      case '🔒URL登録':
-        Bot.save('daireikaiWebhook', command[1]);
-        Bot.stat('登録完了');
-        break;
     }
     
   });
   
-  if (pause) {
-    setTimeout(() => Bot.stat('大霊界BOT停止中'), 5000);
-  } else if (!isSaitama()) {
+  if (isSasuga())
     setInterval(() => {
       var userDataList = [...(new Set(Object.values(Bot.users).filter(u => u.id !== Bot.myId).map(u => getUserData(u))))];
       if (!userDataList.length)
@@ -807,7 +810,6 @@
       bc.postMessage(userDataList);
     }, 15 * 60000);
     setInterval(() => upload(userDataMap, 'tamashii.json'), 24 * 60 * 60000);
-  }
 
 })();
 
@@ -852,4 +854,4 @@
   }, 15 * 60000);
 
 })();
-// signature:yx7T782On3T8FTrDHbkHGecwVmXuRfYaMPr8YBEMliQ0c5gkT5nO3yUXaqzLmLerdhzasymTiChw7F4QqtAW5C/4OlIrho32N8b40GIi
+// signature:b7LliN8t5SgLxL7TidWJ+XG3L252d81zZAHCVHkqUgflfsCVZsPc0oudUD5Nl7lprdf/cSWd6pL3yrrxvAJe3t67yw/XFG+vtma71j1Q

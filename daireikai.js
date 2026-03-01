@@ -1,7 +1,7 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 15;
+  var VERSION = 16;
   var MAX_LOG = 500;
   var API_URL = 'https://sub-chat.onrender.com/bot';
 
@@ -856,4 +856,4 @@
   }, 15 * 60000);
 
 })();
-// signature:0FnReAG2hA0juyd4n7SfLFoSHAKUVnC25XRCZ9AyZ6mIdVVrKGQUPhH/uIyt8kEXjbH4IkYN6Sz5+xQ7sEsUM5dQNZWE7ZLPNS7d3G5h
+// signature:w8JGxX1n2DNOrqQ8fcfufVzTvSpGBMyGn6S1AeqngjlKU5OedDDdPgA1NX55vCGQwRYno+PjCUOB46EoEXETVPlTSOkb5VMSNsVovCeL

@@ -48,7 +48,7 @@
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
       method: 'set', password: apiPassword, key: 'daireikaiBot', value: { time: Date.now(), seasonData, userDataMap }
-    })}), forced ? 0 : 10 * 60000);
+    })}), forced ? 0 : 5 * 60000);
   };
   
   var tamashiiLogs = [];
@@ -854,4 +854,4 @@
   }, 15 * 60000);
 
 })();
-// signature:b7LliN8t5SgLxL7TidWJ+XG3L252d81zZAHCVHkqUgflfsCVZsPc0oudUD5Nl7lprdf/cSWd6pL3yrrxvAJe3t67yw/XFG+vtma71j1Q
+// signature:C00CjiaXpwGq3JDifCTmr5afEKm4+Ppw4xpECIgbaK0yzGSfXPdQ37VItzGrgT9YXSAhLj1S7zAeNffW5/q//066LMnXMCa2Fr3qCuwm

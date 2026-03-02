@@ -21,14 +21,17 @@
   ];
   var denyList = new Set();
   
-  var log = content => fetch(daireikaiWebhook, { method : 'POST', headers : {'Content-Type' : 'application/json'}, body : JSON.stringify({content})}).catch(e => e);
+  var log = content => {
+    if (isSasuga())
+      fetch(daireikaiWebhook, { method : 'POST', headers : {'Content-Type' : 'application/json'}, body : JSON.stringify({content})}).catch(e => e);
+  };
+  var isSasuga = () => location.hash === '#/room/20';
   window.instanceCount = (window.instanceCount || 0) + 1;
   var myInstance = instanceCount;
   log('起動:' + [myInstance, location.hash]);
   
   var ddc = window.daireikaiDataChannel || new BroadcastChannel('daireikaiData');
   window.daireikaiDataChannel = ddc;
-  var isSasuga = () => location.hash === '#/room/20';
   var tamashiiLoad = async () => {
     if (isSasuga()) {
       var daireikaiBot = await (await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
@@ -45,7 +48,8 @@
     }
     seasonData = daireikaiBot.seasonData || [];
     userDataMap = daireikaiBot.userDataMap || {};
-    setTimeout(() => Bot.stat('ロード' + Math.floor(daireikaiBot.time / 1000).toString(36)), 5000);
+    // setTimeout(() => Bot.stat('ロード' + Math.floor(daireikaiBot.time / 1000).toString(36)), 5000);
+    setTimeout(() => Bot.stat('通常'), 5000);
   };
   var saveTimer = null;
   var tamashiiSave = forced => {
@@ -847,9 +851,6 @@
         var {x, y} = user;
         Bot.set({x, y});
         break;
-      case 'BOT通常':
-        Bot.stat('通常');
-        break;
       case 'BOT開始時間':
         Bot.stat(botStartTime.toLocaleString());
         break;
@@ -863,4 +864,4 @@
   }, 15 * 60000);
 
 })();
-// signature:9xH6IQCdlQE0JW2ZAwNWLa3pmLcvXmxcZ+6HBD/D6dbYDcSNDocd/5zXqvjdcFh3Z3HPHbIO5JkIJVYAl+2JiGK6GMbvaqvTKEapBo1c
+// signature:zvXzHYIxkt7X//tmwnYGf99+cxOi47pGwnlGDFR2U8kfeqj86gEtV8WtgEO5uC35Ln6ch81R6I/0SomPm8Wy6XsyqVC5Yei1UKVVPK+9

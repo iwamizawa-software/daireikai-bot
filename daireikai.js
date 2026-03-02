@@ -1,7 +1,7 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 16;
+  var VERSION = 17;
   var MAX_LOG = 500;
   var API_URL = 'https://sub-chat.onrender.com/bot';
 
@@ -29,7 +29,7 @@
       var daireikaiBot = await (await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
         method: 'get', password: apiPassword, key: 'daireikaiBot'
       })})).json();
-      ddc.postMessage(daireikaiBot);
+      setTimeout(() => ddc.postMessage(daireikaiBot), 5000);
     } else {
       var daireikaiBot = await new Promise(resolve => ddc.onmessage = event => resolve(event.data));
     }
@@ -856,4 +856,4 @@
   }, 15 * 60000);
 
 })();
-// signature:w8JGxX1n2DNOrqQ8fcfufVzTvSpGBMyGn6S1AeqngjlKU5OedDDdPgA1NX55vCGQwRYno+PjCUOB46EoEXETVPlTSOkb5VMSNsVovCeL
+// signature:XxGxukXzitQ1cUPCSOmYQ/2TagYnWhsMtSEkZtQEHryEFbFYWTmR/iuuynka9AkYj75IoKn1jbGmCXxGeXJ3iA/jSxh4WY7+Ns9ZuFsi

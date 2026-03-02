@@ -1,7 +1,7 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 17;
+  var VERSION = 18;
   var MAX_LOG = 500;
   var API_URL = 'https://sub-chat.onrender.com/bot';
 
@@ -34,12 +34,12 @@
     } else {
       var daireikaiBot = await new Promise(resolve => ddc.onmessage = event => resolve(event.data));
     }
-    if (!daireikaiBot) {
+    if (!(daireikaiBot && daireikaiBot.userDataMap && daireikaiBot.seasonData)) {
       setTimeout(() => Bot.stat('魂ロード失敗'), 4000);
       throw new Error('魂ロード失敗');
     }
-    seasonData = daireikaiBot.seasonData || [];
-    userDataMap = daireikaiBot.userDataMap || {};
+    window.seasonData = daireikaiBot.seasonData;
+    window.userDataMap = daireikaiBot.userDataMap;
     // setTimeout(() => Bot.stat('ロード' + Math.floor(daireikaiBot.time / 1000).toString(36)), 5000);
     setTimeout(() => Bot.stat('通常'), 4000);
   };
@@ -80,10 +80,13 @@
     statLogs.splice(0, statLogs.length - MAX_LOG);
   };
   
-  var seasonData, userDataMap;
-  
-  setTimeout(() => Bot.stat('魂ロード待ち'), 2000);
-  await tamashiiLoad();
+  if (window.seasonData && window.userDataMap) {
+    window.seasonData = structuredClone(seasonData);
+    window.userDataMap = structuredClone(userDataMap);
+  } else {
+    setTimeout(() => Bot.stat('魂ロード待ち'), 2000);
+    await tamashiiLoad();
+  }
   
   var getUserData = (user, name, recursion) => {
     var id = typeof user === 'string' ? user : (user.kuro || user.shiro);
@@ -855,4 +858,4 @@
   }, 15 * 60000);
 
 })();
-// signature:A0Y/uY8xb+9wTrKN5m9cVYWroWCzIFa1HxDcvWRRuXwHYSqkw4knxUucvV8LUSE0zgYzDyGxoWT4h90KjBizUegg42ZSZzA1VncUOabY
+// signature:AfnxKNkl1VKmK+2fnyPqlF5Vyf/qCjSxleRUaOLAyOkUpfUCYD9LQW4Crvvt+0s2UN29drRqDW2XG3UDO4NROjDpBP6aBCR1hTbWqwti

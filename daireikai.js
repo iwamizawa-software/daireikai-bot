@@ -24,7 +24,7 @@
   var log = content => fetch(daireikaiWebhook, { method : 'POST', headers : {'Content-Type' : 'application/json'}, body : JSON.stringify({content})}).catch(e => e);
   window.instanceCount = (window.instanceCount || 0) + 1;
   var myInstance = instanceCount;
-  log('起動:' + myInstance);
+  log('起動:' + [myInstance, location.hash]);
   
   var ddc = window.daireikaiDataChannel || new BroadcastChannel('daireikaiData');
   window.daireikaiDataChannel = ddc;
@@ -56,7 +56,7 @@
       fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
         method: 'set', password: apiPassword, key: 'daireikaiBot', value: { time: Date.now(), seasonData, userDataMap }
       })});
-      log('保存:' + myInstance);
+      log('保存:' + [myInstance, location.hash]);
     }, forced ? 0 : 5 * 60000);
   };
   
@@ -585,7 +585,7 @@
 
     if (pause || attr.id === Bot.myId || !['COM', 'SET'].includes(type) || (!attr.cmt && !attr.stat))
       return;
-    
+    log('イベント:' + [myInstance, location.hash]);
     var user = Bot.users[attr.id];
     var rejectResponse = reason => Bot.stat('×id:' + user.id.slice(0, 3) + ' ' + reason);
     
@@ -863,4 +863,4 @@
   }, 15 * 60000);
 
 })();
-// signature:rgJjhDsaormLZvJgd7jkv6RY6AlLMdYpoE4cq5ntfckBltaYd0maXayXgZgr98/nyN10ZO6KaRcaxCLB9oShng+ERhsGlGIpePSLX3Ch
+// signature:9xH6IQCdlQE0JW2ZAwNWLa3pmLcvXmxcZ+6HBD/D6dbYDcSNDocd/5zXqvjdcFh3Z3HPHbIO5JkIJVYAl+2JiGK6GMbvaqvTKEapBo1c

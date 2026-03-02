@@ -21,14 +21,7 @@
   ];
   var denyList = new Set();
   
-  var log = content => {
-    if (isSasuga())
-      fetch(daireikaiWebhook, { method : 'POST', headers : {'Content-Type' : 'application/json'}, body : JSON.stringify({content})}).catch(e => e);
-  };
   var isSasuga = () => location.hash === '#/room/20';
-  window.instanceCount = (window.instanceCount || 0) + 1;
-  var myInstance = instanceCount;
-  log('起動:' + [myInstance, location.hash]);
   
   var ddc = window.daireikaiDataChannel || new BroadcastChannel('daireikaiData');
   window.daireikaiDataChannel = ddc;
@@ -39,17 +32,16 @@
       })})).json();
       setTimeout(() => ddc.postMessage(daireikaiBot), 5000);
     } else {
-      //var daireikaiBot = await new Promise(resolve => ddc.onmessage = event => resolve(event.data));
-      pause = true;
+      var daireikaiBot = await new Promise(resolve => ddc.onmessage = event => resolve(event.data));
     }
     if (!daireikaiBot) {
-      setTimeout(() => Bot.stat('魂ロード失敗'), 5000);
+      setTimeout(() => Bot.stat('魂ロード失敗'), 4000);
       throw new Error('魂ロード失敗');
     }
     seasonData = daireikaiBot.seasonData || [];
     userDataMap = daireikaiBot.userDataMap || {};
     // setTimeout(() => Bot.stat('ロード' + Math.floor(daireikaiBot.time / 1000).toString(36)), 5000);
-    setTimeout(() => Bot.stat('通常'), 5000);
+    setTimeout(() => Bot.stat('通常'), 4000);
   };
   var saveTimer = null;
   var tamashiiSave = forced => {
@@ -60,7 +52,6 @@
       fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
         method: 'set', password: apiPassword, key: 'daireikaiBot', value: { time: Date.now(), seasonData, userDataMap }
       })});
-      log('保存:' + [myInstance, location.hash]);
     }, forced ? 0 : 5 * 60000);
   };
   
@@ -91,7 +82,7 @@
   
   var seasonData, userDataMap;
   
-  setTimeout(() => Bot.stat('魂ロード待ち'), 3000);
+  setTimeout(() => Bot.stat('魂ロード待ち'), 2000);
   await tamashiiLoad();
   
   var getUserData = (user, name, recursion) => {
@@ -589,7 +580,7 @@
 
     if (pause || attr.id === Bot.myId || !['COM', 'SET'].includes(type) || (!attr.cmt && !attr.stat))
       return;
-    log('イベント:' + [myInstance, location.hash]);
+    
     var user = Bot.users[attr.id];
     var rejectResponse = reason => Bot.stat('×id:' + user.id.slice(0, 3) + ' ' + reason);
     
@@ -864,4 +855,4 @@
   }, 15 * 60000);
 
 })();
-// signature:zvXzHYIxkt7X//tmwnYGf99+cxOi47pGwnlGDFR2U8kfeqj86gEtV8WtgEO5uC35Ln6ch81R6I/0SomPm8Wy6XsyqVC5Yei1UKVVPK+9
+// signature:A0Y/uY8xb+9wTrKN5m9cVYWroWCzIFa1HxDcvWRRuXwHYSqkw4knxUucvV8LUSE0zgYzDyGxoWT4h90KjBizUegg42ZSZzA1VncUOabY

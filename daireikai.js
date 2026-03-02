@@ -21,6 +21,11 @@
   ];
   var denyList = new Set();
   
+  var log = content => fetch(daireikaiWebhook, { method : 'POST', headers : {'Content-Type' : 'application/json'}, body : JSON.stringify({content})}).catch(e => e);
+  window.instanceCount = (window.instanceCount || 0) + 1;
+  var myInstance = instanceCount;
+  log('起動:' + myInstance);
+  
   var ddc = window.daireikaiDataChannel || new BroadcastChannel('daireikaiData');
   window.daireikaiDataChannel = ddc;
   var isSasuga = () => location.hash === '#/room/20';
@@ -31,7 +36,8 @@
       })})).json();
       setTimeout(() => ddc.postMessage(daireikaiBot), 5000);
     } else {
-      var daireikaiBot = await new Promise(resolve => ddc.onmessage = event => resolve(event.data));
+      //var daireikaiBot = await new Promise(resolve => ddc.onmessage = event => resolve(event.data));
+      pause = true;
     }
     if (!daireikaiBot) {
       setTimeout(() => Bot.stat('魂ロード失敗'), 5000);
@@ -50,6 +56,7 @@
       fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
         method: 'set', password: apiPassword, key: 'daireikaiBot', value: { time: Date.now(), seasonData, userDataMap }
       })});
+      log('保存:' + myInstance);
     }, forced ? 0 : 5 * 60000);
   };
   
@@ -856,4 +863,4 @@
   }, 15 * 60000);
 
 })();
-// signature:XxGxukXzitQ1cUPCSOmYQ/2TagYnWhsMtSEkZtQEHryEFbFYWTmR/iuuynka9AkYj75IoKn1jbGmCXxGeXJ3iA/jSxh4WY7+Ns9ZuFsi
+// signature:rgJjhDsaormLZvJgd7jkv6RY6AlLMdYpoE4cq5ntfckBltaYd0maXayXgZgr98/nyN10ZO6KaRcaxCLB9oShng+ERhsGlGIpePSLX3Ch

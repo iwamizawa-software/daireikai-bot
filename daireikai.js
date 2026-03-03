@@ -778,6 +778,10 @@
         await tamashiiLoad();
         break;
       case '魂保存':
+        if (!isSasuga()) {
+          Bot.stat('流石兄弟でやること');
+          return;
+        }
         tamashiiSave(true);
         upload({ time: Date.now(), seasonData, userDataMap }, 'tamashii.json');
         break;
@@ -858,4 +862,4 @@
   }, 15 * 60000);
 
 })();
-// signature:AfnxKNkl1VKmK+2fnyPqlF5Vyf/qCjSxleRUaOLAyOkUpfUCYD9LQW4Crvvt+0s2UN29drRqDW2XG3UDO4NROjDpBP6aBCR1hTbWqwti
+// signature:OuoQtY2gGg/QBWMNgLptK4OBsPHfxyazn6PsVL6fBo5jXX3PwPHqI9kZvNZopVRBCCt312s7IV9kLu7p+aw7YmoA6as5lXm4a4lJPT9K

@@ -47,6 +47,7 @@
   var tamashiiSave = forced => {
     if (!isSasuga() || (!forced && saveTimer !== null))
       return;
+    clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
       saveTimer = null;
       fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
@@ -862,4 +863,4 @@
   }, 15 * 60000);
 
 })();
-// signature:OuoQtY2gGg/QBWMNgLptK4OBsPHfxyazn6PsVL6fBo5jXX3PwPHqI9kZvNZopVRBCCt312s7IV9kLu7p+aw7YmoA6as5lXm4a4lJPT9K
+// signature:Zv7Wp0tqLrqJDkNLeaLkkqqL4fuV1T/AI7Gn69dyRWU2e4rO3RhacAT3IBd0fat+Th5qojyWEEOi+aDjhVZ/fgnoBkYseGRxLOex0XLe

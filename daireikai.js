@@ -821,7 +821,6 @@
       onTamashiiChange();
       bc.postMessage(userDataList);
     }, 15 * 60000);
-    setInterval(() => upload(userDataMap, 'tamashii.json'), 24 * 60 * 60000);
 
 })();
 
@@ -863,4 +862,4 @@
   }, 15 * 60000);
 
 })();
-// signature:Zv7Wp0tqLrqJDkNLeaLkkqqL4fuV1T/AI7Gn69dyRWU2e4rO3RhacAT3IBd0fat+Th5qojyWEEOi+aDjhVZ/fgnoBkYseGRxLOex0XLe
+// signature:Cz5s0mHCv57M8pIha8fDp5/VwZvx6LgFTBabelZ6oVfv9nvSCgmjvhIIiBJj9H9YzjXX3LoYJkp3zaC86I1+hxyPBfHiwJNYPe7IDYZ7

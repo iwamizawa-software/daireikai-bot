@@ -1,7 +1,7 @@
 (async function () {
 
   var LIMIT = 60 * 60 * 1000;
-  var VERSION = 18;
+  var VERSION = 19;
   var MAX_LOG = 500;
   var API_URL = 'https://sub-chat.onrender.com/bot';
 
@@ -27,21 +27,32 @@
   window.daireikaiDataChannel = ddc;
   var tamashiiLoad = async () => {
     if (isSasuga()) {
-      var daireikaiBot = await (await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+      var daireikaiData = await (await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
         method: 'get', password: apiPassword, key: 'daireikaiBot'
       })})).json();
-      setTimeout(() => ddc.postMessage(daireikaiBot), 5000);
+      var sendDaireikaiData = () => ddc.postMessage({ type: 'send', daireikaiData });
+      setTimeout(sendDaireikaiData, 5000);
+      ddc.onmessage = event => {
+        if (event.data?.type === 'req')
+          sendDaireikaiData();
+      };
     } else {
-      var daireikaiBot = await new Promise(resolve => ddc.onmessage = event => resolve(event.data));
+      var daireikaiData = await new Promise(resolve => {
+        ddc.onmessage = event => {
+          if (event.data?.type === 'send')
+            resolve(event.data.daireikaiData);
+        };
+        setTimeout(() => ddc.postMessage({ type: 'req' }), 15 * 60000);
+      });
     }
-    if (!(daireikaiBot && daireikaiBot.userDataMap && daireikaiBot.seasonData)) {
+    if (!(daireikaiData && daireikaiData.userDataMap && daireikaiData.seasonData)) {
       setTimeout(() => Bot.stat('魂ロード失敗'), 4000);
       throw new Error('魂ロード失敗');
     }
-    window.seasonData = daireikaiBot.seasonData;
-    window.userDataMap = daireikaiBot.userDataMap;
-    // setTimeout(() => Bot.stat('ロード' + Math.floor(daireikaiBot.time / 1000).toString(36)), 5000);
-    setTimeout(() => Bot.stat('通常'), 4000);
+    window.seasonData = daireikaiData.seasonData;
+    window.userDataMap = daireikaiData.userDataMap;
+    // setTimeout(() => Bot.stat('ロード' + Math.floor(daireikaiData.time / 1000).toString(36)), 5000);
+    setTimeout(() => Bot.set({ x: 74.76, y: 38.52, stat: '通常' }), 4000);
   };
   var saveTimer = null;
   var tamashiiSave = forced => {
@@ -862,4 +873,4 @@
   }, 15 * 60000);
 
 })();
-// signature:Cz5s0mHCv57M8pIha8fDp5/VwZvx6LgFTBabelZ6oVfv9nvSCgmjvhIIiBJj9H9YzjXX3LoYJkp3zaC86I1+hxyPBfHiwJNYPe7IDYZ7
+// signature:KemmpRu5YXrfeUV+n/izYoC+/D+jElgHFkFtRj6dhH2pZWA2Lzrk4b61XU95JwOhtoMjEDCArAURIv2Rs54l0TMbcYicCmyHxSvtoQnX
